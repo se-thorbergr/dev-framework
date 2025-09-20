@@ -9,6 +9,11 @@ Welcome to the dev-framework repository. Before making any changes, please revie
 
 Always align work with these documents, follow the shared CLI conventions, and verify changes (`git diff`, etc.) before handoff.
 
+## Quick Reminders
+
+- Run `tools/tests/run-all.sh` before handing off changes so Bash/PowerShell tooling and setup scripts are verified together.
+- Prefer using the shared tooling libraries (`tools/lib/tooling.sh`, `tools/lib/DevFramework.Tooling.psm1`) instead of reimplementing argument parsing or logging.
+
 ## Editing Guidance
 
 - Prefer Python scripts for file modifications (UTF-8, LF endings) when available.
