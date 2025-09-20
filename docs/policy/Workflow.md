@@ -22,6 +22,13 @@ This policy describes how the maintainer (human developer) and the AI assistant 
 - Every specification change must append a dated entry to its changelog so the history remains traceable.
 - New ideas or deferred decisions belong in the appropriate spec section 9 or Supporting Documentation notes, ensuring future visibility.
 
+## Commit Messages
+
+- Format subject lines as `<scope[/sub-scope]>: summary` in lowercase (e.g. `tooling/setup: implement bash script`).
+- Use imperative summary text without trailing punctuation; keep the line within 72 characters.
+- Only add a body when extra context is essential; wrap additional lines at 72 characters.
+- Choose scopes that describe the touched area (`tooling`, `docs/tooling`, `policy/workflow`, etc.).
+
 ## Verification
 
 - After each edit, AI verifies the change by re-reading or diffing the affected file (e.g., `Get-Content`, `rg`, `git diff`) before proceeding.
