@@ -1,0 +1,63 @@
+# root editorconfig for dev-framework
+root = true
+
+############################################
+# Core text settings (applies to all files)
+############################################
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Default indentation: 2-space for docs/scripts; override for C#
+indent_style = space
+indent_size = 2
+max_line_length = off
+
+# Solution files: keep CRLF for Visual Studio friendliness
+[*.sln]
+end_of_line = crlf
+
+# Markdown: keep trailing spaces (tables, line breaks)
+[*.md]
+trim_trailing_whitespace = false
+
+# Windows Batch scripts
+[*.bat]
+end_of_line = crlf
+
+[*.cmd]
+end_of_line = crlf
+
+# C# source files: 4-space indentation
+[*.cs]
+indent_style = space
+indent_size = 4
+
+############################################
+# .NET / C# code style (Roslyn analyzers)
+# Keep C# 6–friendly for MDK/SE.
+############################################
+
+# Using directives
+dotnet_sort_system_directives_first = true
+
+# Bracing & newlines
+csharp_new_line_before_open_brace = all
+csharp_prefer_braces = true:suggestion
+csharp_indent_switch_labels = true
+
+# 'var' usage: prefer explicit types for clarity in PB whitelist context
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Initializers (harmless for C# 6)
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+
+# Misc analyzer tweaks
+
+# We stamp headers via tooling - avoid IDE nagging:
+dotnet_diagnostic.IDE0073.severity = none

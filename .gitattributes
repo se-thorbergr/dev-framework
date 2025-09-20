@@ -1,0 +1,22 @@
+# Default: normalize to LF in repo; let tooling decide on checkout unless overridden below
+*           text=auto eol=lf working-tree-encoding=UTF-8
+
+# Windows-only text that should stay CRLF on checkout
+*.sln       text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# Binary files (never modify line endings)
+*.png       -text
+*.jpg       -text
+*.jpeg      -text
+*.gif       -text
+*.ico       -text
+*.zip       -text
+*.7z        -text
+*.pdf       -text
+*.dll       -text
+*.exe       -text
+*.tiff      -text
+*.otf       -text
+*.wasm      -text

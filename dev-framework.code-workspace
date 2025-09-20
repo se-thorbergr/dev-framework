@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "external": true,
+      "external/": true,
+      "**/external": true
+    }
+  }
+}
