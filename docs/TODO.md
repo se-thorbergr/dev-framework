@@ -6,7 +6,7 @@
 - Policy/spec alignment: review shared conventions, configs, and CLI contract.
 
 ### Shared Libraries
-- Implement shared libraries (`DevFramework.Tooling.psm1`, `tooling.sh`) with CLI + text I/O helpers.
+- ✅ Implement shared libraries (`DevFramework.Tooling.psm1`, `tooling.sh`) with CLI + text I/O helpers. (completed 2025-09-20)
 
 ### Setup
 - Ensure setup tooling creates templates, persists helper paths, and adds licensing headers.
@@ -18,7 +18,7 @@
 ### Bootstrap & CI
 - Improve bootstrap workflow (create PB/Mixin directories, copy `.editorconfig`, trigger initial build, enhance logging).
 - Honor `--sln` override and support additional repo layouts.
-- Provide validation hooks (pre-commit, GitHub Actions).
+- ✅ Provide validation hooks (pre-commit, GitHub Actions). Initial MDK config verifiers landed 2025-09-20.
 
 ### Other
 - Respect Codex opt-in/out and document manual steps.
