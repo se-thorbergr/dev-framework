@@ -425,10 +425,22 @@ function Validate-MdkConfig {
     $invokeArgs = @()
     if ($Arguments) {
         $invokeArgs = $Arguments
+        if ($Arguments.Count -eq 2 -and ($Arguments[0].TrimStart('-').ToLowerInvariant() -eq 'config')) {
+            try {
+                & $script:VerifyMdkScript -Config $Arguments[1]
+                return $LASTEXITCODE
+            } catch {
+                if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { return $LASTEXITCODE } else { return 1 }
+            }
+        }
     }
 
-    & $script:VerifyMdkScript @invokeArgs
-    return $LASTEXITCODE
+    try {
+        & $script:VerifyMdkScript @invokeArgs
+        return $LASTEXITCODE
+    } catch {
+        if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { return $LASTEXITCODE } else { return 1 }
+    }
 }
 
 Export-ModuleMember -Function @(
