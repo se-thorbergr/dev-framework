@@ -1,4 +1,7 @@
 #!/usr/bin/env pwsh
+# dev-framework MDK config verifier (MIT License)
+# Implements config validation per docs/spec/tooling/SharedLibrary.md
+
 
 [CmdletBinding()]
 param(

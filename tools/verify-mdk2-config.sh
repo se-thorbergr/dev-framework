@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# dev-framework MDK config verifier (MIT License)
+# Implements config validation per docs/spec/tooling/SharedLibrary.md
+
 
 set -euo pipefail
 
