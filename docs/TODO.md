@@ -9,7 +9,7 @@
 - ✅ Implement shared libraries (`DevFramework.Tooling.psm1`, `tooling.sh`) with CLI + text I/O helpers. (completed 2025-09-20)
 
 ### Setup
-- Ensure setup tooling creates templates, persists helper paths, and adds licensing headers.
+- ✅ Ensure setup tooling creates templates, persists helper paths, and adds licensing headers. (completed 2025-09-20)
 
 ### Scaffolding
 - Implement MDK2 scaffolder (CLI parity, ini seeding/diffing, class stubs, initial build).
