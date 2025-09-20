@@ -5,6 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 LIB_PATH="${SCRIPT_DIR}/../lib/tooling.sh"
 
 if [[ ! -f $LIB_PATH ]]; then
@@ -99,6 +100,26 @@ test_parse_with_descriptors() {
 }
 
 run_test "parse extra descriptors" test_parse_with_descriptors
+
+check_validate_mdk_config_success() {
+  validate_mdk_config --config "${REPO_ROOT}/se-config.ini"
+}
+
+run_test "validate mdk config success" check_validate_mdk_config_success
+
+check_validate_mdk_config_failure() {
+  local tmp
+  tmp=$(mktemp)
+  printf 'type=programmableblock
+' > "$tmp"
+  if validate_mdk_config --config "$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  rm -f "$tmp"
+}
+
+run_test "validate mdk config failure" check_validate_mdk_config_failure
 
 check_parse_errors() {
   declare -A extra_defs=()

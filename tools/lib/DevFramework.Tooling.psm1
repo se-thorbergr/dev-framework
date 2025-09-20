@@ -414,7 +414,7 @@ function Encode-CiAnnotation {
 function Validate-MdkConfig {
     [CmdletBinding()]
     param(
-        [Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments
+        [string[]]$Arguments
     )
 
     if (-not (Test-Path -LiteralPath $script:VerifyMdkScript)) {
@@ -422,7 +422,12 @@ function Validate-MdkConfig {
         return 127
     }
 
-    & $script:VerifyMdkScript @Arguments
+    $invokeArgs = @()
+    if ($Arguments) {
+        $invokeArgs = $Arguments
+    }
+
+    & $script:VerifyMdkScript @invokeArgs
     return $LASTEXITCODE
 }
 

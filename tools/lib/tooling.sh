@@ -58,10 +58,8 @@ __df_valid_verbosity() {
 __df_escape_annotation() {
   local msg="$1"
   msg="${msg//%/%25}"
-  msg="${msg//$'
-'/%0D}"
-  msg="${msg//$'
-'/%0A}"
+  msg="${msg//$'\r'/%0D}"
+  msg="${msg//$'\n'/%0A}"
   printf '%s' "$msg"
 }
 

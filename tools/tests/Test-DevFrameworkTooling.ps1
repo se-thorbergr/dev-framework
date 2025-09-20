@@ -8,6 +8,7 @@ $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $PSCommandPath
 $modulePath = Join-Path (Split-Path -Parent $scriptDir) 'lib/DevFramework.Tooling.psm1'
 Import-Module $modulePath -Force
+$repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
 
 $global:Failures = 0
 $global:Runs = 0
@@ -77,6 +78,31 @@ Invoke-Test -Name 'parse extra descriptors' -Body {
     Assert-Contains 'item2' ($list -join ',') 'list contains item2'
     Assert-Equal 'pos1' $result.RemainingArgs[0] 'first positional'
     Assert-Equal 'pos2' $result.RemainingArgs[1] 'second positional'
+}
+
+Invoke-Test -Name 'validate mdk config success' -Body {
+    $config = Join-Path $repoRoot 'se-config.ini'
+    $exitCode = Validate-MdkConfig $config
+    Assert-Equal 0 $exitCode 'expected validation success'
+}
+
+Invoke-Test -Name 'validate mdk config failure' -Body {
+    $temp = New-TemporaryFile
+    try {
+        Set-Content -LiteralPath $temp.FullName -Value '[mdk]'
+        $exitCode = $null
+        try {
+            $exitCode = Validate-MdkConfig $temp.FullName
+        }
+        catch {
+            $exitCode = if ($LASTEXITCODE) { $LASTEXITCODE } else { 1 }
+        }
+        if (-not $exitCode) { $exitCode = 1 }
+        if ($exitCode -eq 0) { throw 'expected non-zero exit' }
+    }
+    finally {
+        Remove-Item -LiteralPath $temp.FullName -ErrorAction SilentlyContinue
+    }
 }
 
 Invoke-Test -Name 'parse error reporting' -Body {
