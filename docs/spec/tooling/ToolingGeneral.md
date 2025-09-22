@@ -51,8 +51,7 @@ _Last updated: 2025-09-20 – Owner: geho_
 
 ## 7. Change Log
 
-| Date       | Change                                        | Approved By |
-| ---------- | --------------------------------------------- | ----------- |
-| 2025-09-20 | Initial tooling general specification drafted | geho        |
+| Date       | Change                                                      | Approved By |
+| ---------- | ----------------------------------------------------------- | ----------- |
+| 2025-09-20 | Initial tooling general specification drafted               | geho        |
 | 2025-09-20 | Added terminology definitions for ProjectName/ProjectFolder | geho        |
-

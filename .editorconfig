@@ -22,6 +22,19 @@ end_of_line = crlf
 # Markdown: keep trailing spaces (tables, line breaks)
 [*.md]
 trim_trailing_whitespace = false
+#max_line_length = 120
+
+# Shell scripts (posix/bash)
+[*.sh]
+# --language-variant
+shell_variant = posix
+binary_next_line = true
+# --case-indent
+switch_case_indent = true
+space_redirects = true
+keep_padding = true
+# --func-next-line
+function_next_line = true
 
 # Windows Batch scripts
 [*.bat]
@@ -40,24 +53,116 @@ indent_size = 4
 # Keep C# 6–friendly for MDK/SE.
 ############################################
 
-# Using directives
-dotnet_sort_system_directives_first = true
+# Visual Studio / Roslyn code style visible in editor
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
 
-# Bracing & newlines
-csharp_new_line_before_open_brace = all
 csharp_prefer_braces = true:suggestion
+csharp_new_line_before_open_brace = all:suggestion
 csharp_indent_switch_labels = true
+csharp_prefer_simple_default_expression = true:suggestion
 
-# 'var' usage: prefer explicit types for clarity in PB whitelist context
+# ---------- Analyzer severities by category ----------
+# Tighten security/design/perf; keep style as suggestion to avoid churn in C#6 code.
+dotnet_analyzer_diagnostic.category-Security.severity = error
+dotnet_analyzer_diagnostic.category-Design.severity = warning
+dotnet_analyzer_diagnostic.category-Performance.severity = warning
+dotnet_analyzer_diagnostic.category-Reliability.severity = warning
+dotnet_analyzer_diagnostic.category-Maintainability.severity = warning
+dotnet_analyzer_diagnostic.category-Style.severity = suggestion
+dotnet_analyzer_diagnostic.category-Documentation.severity = suggestion
+
+# ---------- Common rules (C#6-friendly) ----------
+# Avoid unused usings & variables
+dotnet_diagnostic.CS8019.severity = warning    # Unnecessary using directive
+dotnet_diagnostic.CS0168.severity = warning    # Variable declared but never used
+
+# Prefer static if no instance data (perf-friendly on small tick methods)
+dotnet_diagnostic.CA1822.severity = warning    # Mark members as static
+
+# Avoid allocations in hot paths (advisory)
+dotnet_diagnostic.CA1825.severity = warning    # Avoid zero-length array allocations
+
+# Do not use insecure randomness (if present)
+dotnet_diagnostic.CA5394.severity = error      # Do not use insecure randomness
+
+# Globalization rules (often not applicable in ingame scripts) - relax
+dotnet_diagnostic.CA1305.severity = none       # Specify IFormatProvider
+dotnet_diagnostic.CA1303.severity = none       # Do not pass literals as localized parameters
+
+# Exceptions/messages: allow minimal messages (SE scripts are tight)
+dotnet_diagnostic.CA2201.severity = warning    # Do not raise reserved exception types
+
+# Async/Task rules (C#6 + MDK usually avoids async) - disable noisy ones
+dotnet_diagnostic.CA2007.severity = none       # Consider calling ConfigureAwait (not relevant)
+dotnet_diagnostic.CA2012.severity = none       # Use ValueTask correctly (not used)
+
+# ---------- Naming conventions ----------
+# PascalCase for public members
+dotnet_naming_rule.public_members_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.public_members_should_be_pascal_case.symbols  = public_symbols
+dotnet_naming_rule.public_members_should_be_pascal_case.style    = pascal_case_style
+
+dotnet_naming_symbols.public_symbols.applicable_kinds = property,method,field,event
+dotnet_naming_symbols.public_symbols.applicable_accessibilities = public, protected, protected_internal
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# _camelCase for private fields
+dotnet_naming_rule.private_fields_should_be_camel_underscore.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_underscore.symbols  = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_underscore.style    = camel_case_underscore
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.camel_case_underscore.capitalization = camel_case
+dotnet_naming_style.camel_case_underscore.required_prefix = _
+
+# ALL_CAPS for constants
+dotnet_naming_rule.constants_should_be_all_caps.severity = suggestion
+dotnet_naming_rule.constants_should_be_all_caps.symbols  = constants
+dotnet_naming_rule.constants_should_be_all_caps.style    = all_caps
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.all_caps.capitalization = all_upper
+
+# ---------- Formatting preferences ----------
+# Use var only when obvious
 csharp_style_var_for_built_in_types = false:suggestion
-csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_style_var_elsewhere = false:suggestion
 
-# Initializers (harmless for C# 6)
-dotnet_style_object_initializer = true:suggestion
-dotnet_style_collection_initializer = true:suggestion
+# Expression-bodied members off (C#6 has limited support; safer off)
+csharp_style_expression_bodied_methods = false:suggestion
+csharp_style_expression_bodied_properties = false:suggestion
 
-# Misc analyzer tweaks
+# Prefer using statements sorted & separated
+dotnet_sort_system_directives_first = true
+file_header_template = unset
 
-# We stamp headers via tooling - avoid IDE nagging:
-dotnet_diagnostic.IDE0073.severity = none
+
+##########
+## Using directives
+#dotnet_sort_system_directives_first = true
+#
+## Bracing & newlines
+#csharp_new_line_before_open_brace = all
+#csharp_prefer_braces = true:suggestion
+#csharp_indent_switch_labels = true
+#
+## 'var' usage: prefer explicit types for clarity in PB whitelist context
+#csharp_style_var_for_built_in_types = false:suggestion
+#csharp_style_var_when_type_is_apparent = false:suggestion
+#csharp_style_var_elsewhere = false:suggestion
+#
+## Initializers (harmless for C# 6)
+#dotnet_style_object_initializer = true:suggestion
+#dotnet_style_collection_initializer = true:suggestion
+#
+## Misc analyzer tweaks
+#
+## We stamp headers via tooling - avoid IDE nagging:
+#dotnet_diagnostic.IDE0073.severity = none

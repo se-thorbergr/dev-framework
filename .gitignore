@@ -212,8 +212,18 @@ vite.config.ts.timestamp-*
 
 **/*.mdk.local.ini
 
+
 ##
-## project specific
+## dev-framework project specific
 ##
 
+se-config.local.ini
 external/
+
+##
+## AI specific
+##
+
+.ai/handoffs/
+.ai/matrices/
+

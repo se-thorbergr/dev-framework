@@ -39,6 +39,7 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
 | Binary path override | `-BinaryPath <path>` | `--binary-path <path>` | Absolute Space Engineers `Bin64` path.                        |
 | Steam path helper    | `-SteamPath <path>`  | `--steam-path <path>`  | Optional helper for discovery.                                |
 | Game path helper     | `-GamePath <path>`   | `--game-path <path>`   | Optional helper for discovery.                                |
+| Output path          | `-OutputPath <path>` | `--output-path <path>` | Persist MDK `[mdk].output` override (mirrors local config).   |
 | Solution file        | `-Sln <path>`        | `--sln <path>`         | Override default `<repo-name>.sln`.                           |
 | Force Codex setup    | `-SetupCodex`        | `--setup-codex`        | Skip prompt and run Codex bootstrap.                          |
 | Skip Codex setup     | `-SkipCodex`         | `--skip-codex`         | Bypass Codex bootstrap entirely.                              |
@@ -61,9 +62,9 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
    - `--notes-only` prints detection results and remediation steps without executing commands or modifying the system.
 4. Ensure configuration files:
    - If `se-config.ini` is missing, warn and restore the tracked version when possible (or emit guidance under `--notes-only`).
-   - If `se-config.local.ini` is missing and not `--notes-only`, copy from `docs/se-config.local.example.ini`, recording the action. `--notes-only` prints the command/path the developer should create manually.
-   - Update or confirm `[Paths]` (`steam_path`, `game_path`) whenever CLI arguments, interactive discovery, or helper detection produce values. Persist these helpers back into `se-config.local.ini` (unless running with `--notes-only`/`--dry-run`) while avoiding overwriting explicit user entries without confirmation.
-   - Write the resolved `binarypath` into `[Build]` when not `auto`, after confirming with the developer in interactive sessions. In `--notes-only`, report the path but do not persist.
+   - If `se-config.local.ini` is missing and not `--notes-only`, copy `docs/se-config.local.example.ini` verbatim. The template includes the MDK defaults (`output=auto`, `binarypath=auto`) so new local files match scaffolded projects; tooling must not append any extra keys beyond the template or explicit overrides. `--notes-only` prints the command/path the developer should create manually.
+   - Update or confirm `[Paths]` (`steam_path`, `game_path`) whenever CLI arguments, interactive discovery, or helper detection produce values. Persist only the keys that changed, unless running with `--notes-only`/`--dry-run`, while avoiding overwriting explicit user entries without confirmation.
+   - When persisting a resolved `binarypath`, `output`, or other `[mdk]` overrides, write only the specific keys whose values differ from `se-config.ini`. In `--notes-only`, report the value but do not persist.
 5. Workspace setup:
    - Determine target solution file from `--sln` or default `<repo-name>.sln`. Create with `dotnet new sln` when absent (respect dry-run/notes-only restrictions).
    - Drive Codex tooling setup:
@@ -79,14 +80,14 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
 - Global config files maintain the same `[mdk]` section as MDK2 templates (`type`, `trace`, `minify`, `ignores`, `donotclean`) and must stay in lockstep with the template schema.
   - Reference: <https://github.com/malforge/mdk2/wiki/MDK%C2%B2-Project-Configuration-Guide>.
   - Dev-framework extensions live under `[Paths]` (`steam_path`, `game_path`). Local `output`/`binarypath` overrides stay in the developer's `se-config.local.ini` `[mdk]` section per MDK² guidance.
-- Resolution order: CLI arguments -> local override (`se-config.local.ini`) -> default template -> built-in defaults.
-- During validation runs the tooling should flag when unknown sections/keys appear so schema drift is caught early; deviations require spec updates before implementation continues.
+- Resolution order: CLI arguments -> local override (`se-config.local.ini`) -> default template (`se-config.ini`) -> built-in defaults. Validation loads both configuration files, applying local overrides on top of the tracked template before enforcing required keys.
+- During validation runs the tooling should flag unknown sections/keys so schema drift is caught early; deviations require spec updates before implementation continues. When a local value duplicates the template value (including the MDK defaults that ship in the example template), issue a warning instead of failing the run. Tooling should persist only keys whose values change from the effective merged configuration, including `output` overrides supplied via CLI.
 - When `binarypath` remains `auto`, the resolved absolute path is echoed for reference but not written; only explicit overrides provided via CLI or prompts are persisted into `se-config.local.ini`. In `--notes-only`, the path is reported without any persistence regardless of override status.
 
 ## 6. Outputs
 
 - Potential file touch points:
-  - `se-config.ini` / `se-config.local.ini` (creation or updates to `[mdk]` and helper `[Paths]` values).
+  - `se-config.ini` / `se-config.local.ini` (creation or updates limited to keys that represent actual overrides plus helper `[Paths]` values).
   - Solution file specified by `--sln`.
   - Optional Codex tooling directories/files when setup proceeds (local `node_modules/` and npm cache entries remain git-ignored).
 - Console output respects verbosity while ensuring dependency guidance, security warnings, and Codex prompts are visible at `info`. Debug output includes executed commands and resolved path diagnostics.
@@ -133,5 +134,5 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
 | 2025-09-20 | Documented winget/MSI and apt install flows plus Codex npm bootstrap with Node guidance | geho        |
 | 2025-09-20 | Clarified se-config template handling scope (root-only) and removed per-project writes  | geho        |
 | 2025-09-20 | Referenced ToolingGeneral shared CLI contract                                           | geho        |
-| 2025-09-20 | Documented ProjectName/ProjectFolder terminology                                       | geho        |
-
+| 2025-09-20 | Documented ProjectName/ProjectFolder terminology                                        | geho        |
+| 2025-09-20 | Clarified minimal local config overlay, duplicate-value warnings, and validation order  | geho        |

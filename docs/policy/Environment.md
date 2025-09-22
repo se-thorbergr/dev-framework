@@ -27,21 +27,22 @@ This policy defines the supported development and build environment for the dev-
 
 ## Configuration Files
 
-- `se-config.ini` lives in the super-repo root and mirrors the semantics of `ProjectName.mdk.ini`, including the core `[mdk]` section (`type`, `trace`, `minify`, `ignores`, `donotclean`) and any dev-framework extensions. Setup tooling ensures this file exists.
-- `se-config.local.ini` is gitignored, mirrors `ProjectName.mdk.local.ini`, and carries developer-specific overrides using the same section/key names plus helper paths such as `steam_path`, `game_path`.
+- `se-config.ini` lives in the super-repo root and mirrors the semantics of `ProjectName.mdk.ini`, including the core `[mdk]` section (`type`, `trace`, `minify`, `ignores`, `donotclean`) and any dev-framework extensions. Setup tooling ensures this file exists and treats it as the canonical default configuration.
+- `se-config.local.ini` is gitignored, mirrors `ProjectName.mdk.local.ini`, and carries only the developer-specific overrides using the same section/key names plus helper paths such as `steam_path`, `game_path`. The example template includes the MDK defaults (`output=auto`, `binarypath=auto`) so new local files align with scaffolding; developers can remove or override keys as they customise their environment. Tooling should avoid adding extra keys beyond those defaults unless a non-default value is required.
+- Developers may freely duplicate keys from the tracked template in their local file for clarity. Verification tooling warns (but does not fail) when duplicate values match the defaults.
 - When PB-script projects are scaffolded, `se-config.ini` / `se-config.local.ini` act as templates for seeding missing `ProjectName.mdk.ini` / `ProjectName.mdk.local.ini`.
 - The `[mdk]` section must stay aligned with the MDK² Project Configuration Guide (`type`, `trace`, `minify`, `ignores`, `donotclean`); see <https://github.com/malforge/mdk2/wiki/MDK%C2%B2-Project-Configuration-Guide>.
-- Developers may override paths via CLI (`--binary-path`, `--steam-path`, `--game-path`) or by editing their local INI.
+- Developers may override paths via CLI (`--binary-path`, `--steam-path`, `--game-path`, `--output-path`) or by editing their local INI.
 
 ## Tooling Alignment
 
 ## Tooling Layers
 
-| Policy | Spec | Tool |
-| ------ | ---- | ---- |
-| Environment | ToolingGeneral.md | All tooling |
-| Environment | SetupTooling.md | tools/Setup.ps1, tools/setup.sh |
-| Environment | ScaffoldMdk2Project.md | tools/ScaffoldMdk2Project.ps1, tools/scaffold-mdk2-project.sh |
+| Policy      | Spec                        | Tool                                                                    |
+| ----------- | --------------------------- | ----------------------------------------------------------------------- |
+| Environment | ToolingGeneral.md           | All tooling                                                             |
+| Environment | SetupTooling.md             | tools/Setup.ps1, tools/setup.sh                                         |
+| Environment | ScaffoldMdk2Project.md      | tools/ScaffoldMdk2Project.ps1, tools/scaffold-mdk2-project.sh           |
 | Environment | ScaffoldProjectSubmodule.md | tools/ScaffoldProjectSubmodule.ps1, tools/scaffold-project-submodule.sh |
 
 - **Setup tooling** (`tools/Setup.ps1`, `tools/setup.sh`): prepares the super-repo environment, installs required SDKs, and ensures the root `se-config.ini` / `se-config.local.ini` templates exist (no per-project seeding).
