@@ -1,0 +1,40 @@
+# .ai/workflows/code.yaml - AI golden order for code (machine-readable)
+# Humans follow docs/policy/Workflow.md; agents follow this file.
+# Scope: C# (*.cs); PowerShell (tools/**/*.ps1|*.psm1|*.psd1); Bash (*.sh).
+# Notes: staged-only; respect .gitignore; use repo-local tools (dotnet format, PSScriptAnalyzer, shfmt/shellcheck).
+
+golden_order:
+  - sync_branch:
+      when: "ask_first('branch creation/checkout')"
+      command: "git fetch --all --prune && git checkout -b <feature/xyz>"
+  - format_staged:
+      csharp: "dotnet format --no-restore --include $(git diff --cached --name-only -- '*.cs')"
+      pwsh: "Invoke-Formatter on staged *.ps1|*.psm1|*.psd1; restage"
+      bash: "shfmt -w $(git diff --cached --name-only -- '*.sh')"
+  - lint_verify:
+      pwsh_fix_then_verify: true
+      bash_shellcheck_staged: true
+      csharp_build_warnaserror: true
+  - build: "dotnet build -warnaserror"
+  - tests:
+      dotnet: "dotnet test --nologo"
+      pwsh: "Invoke-Pester tools/tests/pwsh -CI"
+      bash: "bats -r tools/tests/bash"
+  - security: "dotnet list package --vulnerable"
+  - verify_trace: true
+  - present_plan: true
+  - commit_rules:
+      conventional: true
+      subject_format: "<scope[/sub-scope]>: summary"
+      trailer: "[ai-edit]"
+  - ci_check_modes: true
+  - ci_minimal_info_only:
+      format_check: "dotnet format --verify-no-changes || true"
+      pwsh_lint: 'pwsh -NoProfile -Command "Invoke-ScriptAnalyzer -Path (Get-ChildItem -Recurse -Include *.ps1,*.psm1,*.psd1 | ForEach-Object FullName) -Settings tools/pssa/PSScriptAnalyzerSettings.psd1; exit 0"'
+      bash_lint: 'files="$(git ls-files ''*.sh'')"; if [ -n "$files" ]; then shellcheck $(grep -v ''^[[:space:]]*#'' tools/shell/shellcheckrc | xargs) $files || true; else echo ''No *.sh files to lint''; fi'
+notes:
+  - "Reads ${MODE} from core.yaml; in SE mode, local code tools may be skipped; CI enforces."
+  - "In CI (e.g., GitHub), SE solutions are not built; build is local-only. CI runs format/lint only."
+  - "Branch creation/checkout enforced via ask_first(...) per AGENTS.md."
+  - "No repo-wide formatting without explicit consent."
+  - "Respect file-policy.yaml for read/write boundaries."

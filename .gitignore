@@ -217,6 +217,7 @@ vite.config.ts.timestamp-*
 ## dev-framework project specific
 ##
 
+.devfw-mode.local
 se-config.local.ini
 external/
 
@@ -226,4 +227,3 @@ external/
 
 .ai/handoffs/
 .ai/matrices/
-

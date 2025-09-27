@@ -1,0 +1,18 @@
+# .ai/policies/file-policy.yaml — read/write boundaries for agents
+# Writes are limited to tracked/staged files; some paths excluded. Reads can include specific ignored artifacts.
+
+writes:
+  include:
+    - tracked: true # git ls-files
+    - staged: true # git diff --cached
+  exclude:
+    - "**/.ai/handoffs/**"
+    - "**/.ai/matrices/**"
+
+reads:
+  allow:
+    - "**/.ai/handoffs/**/*.md"
+    - "**/.ai/matrices/**/*.{json,yml,yaml}"
+notes:
+  - "Treat .gitignore as the write/scan boundary; read-only exceptions above are allowed."
+  - "Directory paths inside workflow command strings (e.g., Pester/bats roots like tools/tests/pwsh or tools/tests/bash) are allowed and exempt from filename mapping integrity checks."

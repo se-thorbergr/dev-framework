@@ -1,3 +1,5 @@
+# .gitattributes - canonical (LF in repo; CRLF where appropriate; UTF-8 working tree)
+
 # Default: normalize to LF in repo; let tooling decide on checkout unless overridden below
 *           text=auto eol=lf working-tree-encoding=UTF-8
 

@@ -1,0 +1,68 @@
+# .ai/policies/style.yaml — editorial and text/encoding rules for AI output
+# Precedence: pragma > pins > overrides > default
+version: 1
+
+language:
+  locale: en-US # US English in all human-facing prose
+  enforce_consistency: true # do not mix dialects within a document
+
+punctuation:
+  ascii_only: true # default to ASCII punctuation in generated output
+  dashes: "hyphen" # use ASCII '-' (with spaces for prose, e.g., " - ")
+  quotes: "straight" # use ' and "
+  ellipsis: "..." # never use the single-character ellipsis
+  normalize_nbsp: true # replace NBSP (U+00A0) with ordinary space
+  normalize_soft_hyphen: true # remove SHY (U+00AD) or replace with '-'
+  normalize_nb_hyphen: true # replace NB hyphen (U+2011) with '-'
+  allow_unicode_in_literals: true # only for exact quotations/URLs/examples
+  enforce_on_handoff: true # normalize any disallowed punctuation before finalizing
+
+unicode:
+  normalization: NFC # normalize produced text to NFC
+  paths:
+    ascii_only_tooling_owned: true # tooling-owned/generated paths must be ASCII
+    whitelist:
+      - "docs/i18n/**" # explicit areas where Unicode paths are allowed
+    disallow:
+      - "emoji"
+      - "controls" # non-printing control characters
+    ci_enforce: true # CI rejects non-ASCII outside the whitelist
+    keep_project_names_ascii: true # project names/namespaces must be ASCII
+  strings:
+    logs_and_keys_ascii_only: true # ASCII in logs, keys, protocol tokens
+    ui_text_allowed: true # Unicode allowed for player-visible UI text
+    ui_fallbacks:
+      arrow: "->"
+      ellipsis: "..."
+    strip_controls: true
+    comparisons: "Ordinal" # culture-invariant comparisons
+    font_coverage_note: true # caution about SE font coverage
+
+encoding:
+  default: "UTF-8"
+  console_ps7:
+    set_console_outputencoding: true # set OutputEncoding on PS7+
+  console_bash:
+    export_lang_lc_all: "C.UTF-8"
+
+versions_in_prose:
+  wildcard_style: "7.x" # prose uses 7.x / 9.0.x
+  in_code_use_native_syntax: true # code/config uses native version constraints
+
+tone:
+  docs_imperative_second_person: true
+  active_voice: true
+
+overrides:
+  - paths: ["**/README.md"]
+    punctuation:
+      ascii_only: true
+  - paths: ["docs/policy/**"]
+    unicode:
+      strings:
+        ui_text_allowed: false # policies stay strictly ASCII in examples
+
+# Highest priority after pragma
+pins: []
+
+precedence: [pragma, pins, overrides, default]

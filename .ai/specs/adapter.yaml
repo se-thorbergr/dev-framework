@@ -1,0 +1,49 @@
+# .ai/specs/adapter.yaml — AI adapter checklist (tiny stub)
+id: adapter-checklist
+version: 2025-09-26
+source_of_truth:
+  - .ai/policies/core.yaml
+  - .ai/policies/routing.yaml
+  - .ai/policies/file-policy.yaml
+  - .ai/policies/comment-levels.yaml
+workdir:
+  mode_resolution_order:
+    - file: .devfw-mode.local # developer override (gitignored)
+    - env: DEVFW_MODE
+    - file: .devfw-mode # repo default (committed)
+    - heuristic: mdk2_only_repo
+  resolved_var: ${MODE} # se | tooling | auto
+boundaries:
+  # Enforce scoped edits + read-only
+  staged_only: true
+  ignore_file: .gitignore
+  read_only_extensions: [".ini", ".mdk.ini"]
+workflows:
+  # Pick workflow by scope; run steps on staged files only
+  - scope: config
+    file_globs: ["**/*.yml", "**/*.yaml", "**/*.json", "**/*.ini"]
+    workflow: .ai/workflows/config.yaml
+  - scope: docs
+    file_globs: ["**/*.md", "**/*.markdown"]
+    workflow: .ai/workflows/docs.yaml
+  - scope: code
+    file_globs: ["**/*"]
+    exclude_globs: ["**/*.yml", "**/*.yaml", "**/*.json", "**/*.ini", "**/*.md", "**/*.markdown"]
+    workflow: .ai/workflows/code.yaml
+ci_gates:
+  minimal_info_only: # do not fail CI yet
+    format: true
+    lint: true
+    build: false # SE build is local-only
+handoff:
+  require_mini_diff: true
+  artifacts_dir: .ai/handoffs/
+comment_level:
+  precedence: [pragma, pins, overrides, default]
+  config: .ai/policies/comment-levels.yaml
+edit_safety:
+  preflight_match_count: true
+  atomic_hunks_only: true
+  postflight_verify: [presence, absence, count]
+  stop_on_failure: true
+  idempotent_ok: true

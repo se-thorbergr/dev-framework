@@ -1,0 +1,93 @@
+# .ai/policies/safety.yaml — edit safety & verification rails for agents
+# Precedence: pragma > pins > overrides > default
+version: 1
+
+agents:
+  applies_to: ["webgpt", "codex", "local", "ci"] # all agent types must obey these rails
+  require_policy_bootstrap: true # load .ai/policies/* before any edit
+  deny_direct_writes: true # produce patches/structured output; apply via workflows on staged files
+  ci_block_on_violation: true # CI fails if rails are violated
+
+edit_safety:
+  require_open_canvas: true # only edit a canvas the user has opened
+  forbid_background_edits: true # no async/deferred edits; operate only in current turn
+  batch_abort_on_mismatch: true # if any targeted pattern misses, abort the whole batch
+  minimal_diffs: true # keep changes small and targeted
+  require_exact_headers: true # match exact headings for renumber/rewrite
+  ascii_normalization_after_edit: true # normalize disallowed punctuation before finalizing
+  test_first_mode: true # tools/** changes require tests first (see tests block below)
+
+preflight:
+  - "refresh_cache" # pull latest canonical state
+  - "detect_active_canvas" # verify opened canvas matches the intended target
+  - "scan_for_placeholders" # detect $1/$2/etc. and resolve before edits
+  - "locate_targets" # find exact anchors (headers/lines) to edit
+  - "backup_context" # keep before-snapshot for diff reporting
+
+apply:
+  - "atomic_updates" # apply in small, independent steps
+  - "ordered_renumbering" # renumber safely when inserting sections
+  - "insert_changelog_policy" # ensure policy line above the change log table
+  - "append_changelog_bottom" # append new row at the bottom (chronological top→bottom)
+
+verify:
+  - "re_read_canvas" # re-open and verify expected text is present
+  - "exact_header_checks" # confirm headers match intended numbers/titles
+  - "before_after_diff" # compute and report minimal diff
+  - "lint_ascii_punctuation" # confirm ASCII-only punctuation where required
+  - "cross_links_exist" # verify referenced filenames exist
+
+# Test-first expectations for tooling
+tests:
+  frameworks:
+    bash: "bats"
+    pwsh: "pester"
+  requirements:
+    - "new_features_require_tests_first" # add/update tests before code in tools/**
+    - "regressions_require_failing_test_then_fix" # reproduce bug with failing test, then fix
+    - "prefer_component_entrypoint_tests" # test script entry points (flags/inputs), not internals
+  outputs_must_be:
+    help_version_parseable: true # --help/--version stable, parseable
+    dry_run_side_effects: "none" # --dry-run must not change state
+
+rollback:
+  on_first_failure: true # stop immediately and report; do not guess
+  strategy: "no-op" # do not auto-revert partials; request user guidance
+
+reporting:
+  include:
+    - "summary" # what changed and why
+    - "commands" # exact commands/patterns applied (if any)
+    - "diff_snippets" # minimal unified diff
+    - "validation_results" # checks run and outcomes
+  redaction:
+    secrets: true # never emit tokens/secrets
+    absolute_paths: "minimize" # prefer repo-relative paths in reports
+
+ci_expectations:
+  require:
+    - "yaml_schema_validation" # validate .ai YAMLs in CI
+    - "ascii_path_whitelist_check" # non-ASCII path check outside whitelisted areas
+    - "punctuation_ascii_check" # ASCII-only check for policies/specs
+    - "tests_present_for_tools_changes" # if tools/** changed, matching tests under tools/tests/** must change
+    - "tests_run_and_pass" # run bats and pester; require green
+    - "help_version_parseable_check" # parse --help/--version output
+    - "dry_run_no_side_effects_check" # assert no side effects in --dry-run paths
+  optional:
+    - "spelling_en_us" # spell-check against en-US dictionary
+    - "links_exist" # verify referenced docs exist
+
+overrides:
+  - paths: ["docs/policy/**"]
+    edit_safety:
+      minimal_diffs: true
+      require_exact_headers: true
+    verify:
+      - "re_read_canvas"
+      - "before_after_diff"
+      - "lint_ascii_punctuation"
+      - "cross_links_exist"
+
+pins: []
+
+precedence: [pragma, pins, overrides, default]

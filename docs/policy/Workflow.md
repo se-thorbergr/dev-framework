@@ -1,3 +1,5 @@
+> Tone: second person, active, imperative; precise and concise.
+
 # Workflow Policy
 
 This policy describes how the maintainer (human developer) and the AI assistant collaborate on the dev-framework project.
@@ -28,6 +30,13 @@ This policy describes how the maintainer (human developer) and the AI assistant 
 - Use imperative summary text without trailing punctuation; keep the line within 72 characters.
 - Only add a body when extra context is essential; wrap additional lines at 72 characters.
 - Choose scopes that describe the touched area (`tooling`, `docs/tooling`, `policy/workflow`, etc.).
+
+## Test-first mode (tooling)
+
+- For new features or changes to scripts under `tools/`, write or update tests **first** (Bats/Pester), then implement code to make tests pass.
+- For regressions, add a failing test that reproduces the issue, then fix to green.
+- Prefer component-style tests that exercise script entry points (flags/inputs) rather than internal helpers.
+- `--help`/`--version` output **must** be stable and parseable in tests; `--dry-run` paths **must** have no side effects.
 
 ## Verification
 

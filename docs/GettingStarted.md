@@ -10,16 +10,18 @@ Follow these steps to prepare your development environment and understand the pr
 
 ## 2. Prepare Dependencies
 
-- Install dotnet SDK 9.0._ and PowerShell 7._ using your package manager when available; otherwise plan for manual installs.
+- Install dotnet SDK 9.0.x and PowerShell 7.x using your package manager when available; otherwise plan for manual installs.
 - Ensure access to the Space Engineers `Bin64` directory. If you work cross-platform, expose the folder via shared storage.
 - Decide whether to enable Codex tooling; it is optional but supported by the setup scripts.
 
 ## 3. Run the Setup Tooling
 
+- If you enable Codex, ensure **Node.js** and **npm** are available (manual install is fine; package manager preferred).
+
 1. From the repository root, run the relevant script:
    - Windows: `pwsh ./tools/Setup.ps1`
-   - Linux/macOS: `./tools/setup.sh`
-2. The script honours CLI switches described in [Setup Tooling Specification](spec/tooling/SetupTooling.md); shared switches (e.g., `--dry-run`, `--verbose`, `--summary`, `--ci`, `--help`) come from [ToolingGeneral.md](spec/tooling/ToolingGeneral.md).
+   - Linux/WSL (Debian/Ubuntu): `./tools/setup.sh`
+2. The script honors CLI switches described in [Setup Tooling Specification](spec/tooling/SetupTooling.md); shared switches (e.g., `--dry-run`, `--verbose`, `--summary`, `--ci`, `--help`, `--version`) come from [ToolingGeneral.md](spec/tooling/ToolingGeneral.md).
 3. Follow prompts to resolve paths and install missing dependencies. When declining automatic installs, record the manual steps suggested by the tool.
 
 ## 4. Verify Configuration

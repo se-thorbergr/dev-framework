@@ -1,0 +1,66 @@
+# .ai/policies/core.yaml — entrypoint for AI configuration (machine-readable)
+# Human policies live under docs/policy/*.md. This file aggregates AI-only configs.
+
+version: 1
+includes:
+  - comment-levels.yaml
+  - file-policy.yaml
+  - routing.yaml
+
+permissions:
+  ask_first:
+    - package_installs
+    - file_writes
+    - commit_push
+    - full_build
+    - network_non_registry
+    - secrets_touch
+artifacts:
+  handoffs_dir: .ai/handoffs
+  matrices_dir: .ai/matrices
+human_policy_refs:
+  coding_style: "docs/policy/CodingStyle.md"
+  workflow: "docs/policy/Workflow.md"
+  environment: "docs/policy/Environment.md"
+notes:
+  - "This AI config is authoritative for agents."
+  - "Workspace mode determines which tools run locally vs. CI."
+
+# Workspace modes let SE-only developers avoid local non-.NET tooling
+workspace:
+  mode: auto   # one of: auto | se | tooling
+  detection_order:
+    - file: .devfw-mode.local   # developer override (gitignored)
+    - env: DEVFW_MODE           # environment override
+    - file: .devfw-mode         # repo default (committed)
+    - heuristic: mdk2_only_repo  # fallback if solution contains only MDK2/C#
+  scope_precedence: [config, docs, code]
+  ci_enforcement: true  # CI always runs full docs/config checks
+  scope_precedence: [config, docs, code]
+  ci_enforcement: true  # CI always runs full docs/config checks
+
+# Tool requirements by mode (used by agents and wrappers)
+tools:
+  required_by_mode:
+    se:
+      required: [dotnet, mdk2]
+      optional: [node, npm, prettier, markdownlint, yamllint, jq, psscriptanalyzer, shfmt, shellcheck]
+    tooling:
+      required: [dotnet, node, npm]
+      recommended: [prettier, markdownlint, yamllint, jq, psscriptanalyzer, shfmt, shellcheck]
+
+# Runtime variables available to workflows
+runtime_vars:
+  MODE: "${workspace.mode}"
+
+# Policy switches consumed by docs/config workflows
+policy_flags:
+  docs_config_local:
+    se:
+      formatter: skip
+      linters: validate_or_skip
+      writes: none
+    tooling:
+      formatter: run
+      linters: run
+      writes: allowed

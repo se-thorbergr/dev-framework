@@ -1,52 +1,74 @@
 # dev-framework TODO Plan
 
-## Priority 1 - Tooling foundation
+> Status reset (2025-09-24): Previous completion marks may be invalid due to broken tooling setup. Treat previously completed items as **unfinished**.
+
+**Current phase focus:** Governance → Policy/spec alignment: review shared conventions, configs, and CLI contract.
+
+## Priority 1 — Tooling foundation (governance, policies, minimal CI)
 
 ### Governance
+
 - Policy/spec alignment: review shared conventions, configs, and CLI contract.
 
+### Policies (moved up)
+
+- Flesh out CodingStyle, Environment, and Workflow policies with rules enforceable by tooling (`docs/policy/*.md`).
+- Align `.editorconfig`, `.gitattributes`, and dependency requirements (dotnet 9, PowerShell 7, MDK2 tooling).
+
 ### Shared Libraries
-- ✅ Implement shared libraries (`DevFramework.Tooling.psm1`, `tooling.sh`) with CLI + text I/O helpers. (completed 2025-09-20)
+
+- Implement shared libraries (`DevFramework.Tooling.psm1`, `tooling.sh`) with CLI + text I/O helpers. (re-opened)
 
 ### Setup
-- ✅ Ensure setup tooling creates templates, persists helper paths, and adds licensing headers. (completed 2025-09-20)
 
-### Scaffolding
-- Implement MDK2 scaffolder (CLI parity, ini seeding/diffing, class stubs, initial build).
-- Implement submodule scaffolder (git plumbing, project delegation, build/commit guidance).
+- Ensure setup tooling creates templates, persists helper paths, and adds licensing headers. (re-opened)
 
-### Bootstrap & CI
-- Improve bootstrap workflow (create PB/Mixin directories, copy `.editorconfig`, trigger initial build, enhance logging).
-- Honor `--sln` override and support additional repo layouts.
-- ✅ Provide validation hooks (pre-commit, GitHub Actions). Initial MDK config verifiers landed 2025-09-20.
+### Minimal CI gates (moved up)
+
+- CI runs (informational first): **format check** and **lint check** in CI; **build is local-only** (SE game not available in CI).
+- Rollout: start info-only, then enforce once green on default branch.
+- **TODO:** Flip CI from info-only → enforcing (**format/lint only**) once stability criteria are met (e.g., 7 consecutive green PRs on default). Update `.ai/workflows/code.yaml` and announce in changelog.
 
 ### Other
+
+- **Optional:** Add `.ai/specs/adapter.yaml` (Agent adapter checklist) to guide external LLM runners: load core.yaml, resolve ${MODE}, enforce staged-only edits, respect read-only INI/.mdk.ini, execute scoped workflows, produce unified diffs, honor comment-levels.
 - Respect Codex opt-in/out and document manual steps.
 - Enforce dependency validation (MDK2 template, dotnet SDK 9, PowerShell 7, Steam path discovery).
 - Keep `se-config.ini` / `se-config.local.ini` aligned with MDK2 defaults.
 - Maintain appendix of MDK2 tool outputs.
 
+## Priority 2 — Setup, Scaffolding & Bootstrap
 
+### Setup (execution-first)
 
-## Priority 2 - Architecture refinement
+- Finalize setup flow (idempotent, detects prerequisites, clear error messages).
+- Verify environment detection (dotnet SDK, MDK2 path, Steam path) and persist helper paths.
+- Generate/update templates and licensing headers as part of setup.
+- **Optional helper:** `devfw mode [se|tooling|auto]` to read/write `.devfw-mode` / `.devfw-mode.local`, print current status, and safely set mode (CI-safe).
+
+### Scaffolding
+
+- Implement MDK2 scaffolder (CLI parity, ini seeding/diffing, class stubs, initial build).
+- Implement submodule scaffolder (git plumbing, project delegation, build/commit guidance).
+
+### Bootstrap
+
+- Create PB/Mixin directories, copy `.editorconfig`, trigger initial build, enhance logging.
+- Honor `--sln` override and support additional repo layouts.
+
+## Priority 3 — Architecture refinement
 
 - Consolidate legacy VIOS material into current OS documentation (`docs/arch/OS.core.md`, `docs/arch/README.md`, `docs/arch/VIOS.obsolete.md`).
 - Define module/component boundaries and interactions, including data flow between Programmable Blocks and mixins.
 - Clarify how submodules integrate with the super-repo build and deployment process.
 
-## Priority 3 - Specifications
+## Priority 4 — Specifications
 
 - Translate finalized architecture into spec documents outlining APIs, data contracts, and lifecycle expectations (`docs/spec/README.md`, future per-module specs).
 - Capture acceptance criteria for scaffolded projects (directory layout, required files, coding standards).
 - Describe testing and verification approach for PBscript/Mixin modules.
 
-## Priority 4 - Policies
-
-- Flesh out CodingStyle, Environment, and Workflow policies with actionable rules tied to tooling enforcement (`docs/policy/*.md`).
-- Align `.editorconfig`, `.gitattributes`, and related configs with the written policies and dependency requirements (dotnet 9, PowerShell 7, MDK2 tooling).
-- Reference policy touchpoints within README/GettingStarted to onboard contributors quickly.
-
-## Priority 5 - CI Gates
+## Priority 5 - CI Gates (full)
 
 - Identify mandatory checks (linting, formatting, build, unit/integration) derivable from policies and tooling.
 - Sketch GitHub Actions/Git hooks pipeline steps and artifacts required for each gate.

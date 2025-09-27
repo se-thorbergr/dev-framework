@@ -1,0 +1,30 @@
+{
+  // Respect .editorconfig/.gitattributes:
+  // - Prettier controls wrapping/EOL; Git normalizes line endings.
+  // - Keep lint focused on Markdown semantics.
+
+  "default": true,
+
+  // Formatting delegated to Prettier / .editorconfig
+  "MD013": false, // line length
+  "MD041": false, // first line should be a top-level heading (allow files with front matter or comments)
+
+  // Allow limited inline HTML that’s common in our docs
+  "MD033": { "allowed_elements": ["br", "img", "a", "details", "summary"] },
+
+  // Code blocks and lists
+  "MD046": { "style": "fenced" }, // prefer fenced code blocks
+  "MD029": { "style": "one" }, // ordered lists all "1."
+  "MD024": { "allow_different_nesting": true }, // duplicate headings allowed at different nesting
+
+  // Lists/indentation (align with typical 2-space indent)
+  "MD007": { "indent": 2 },
+  "MD004": { "style": "dash" }, // unordered list marker
+
+  // Hygiene
+  "MD010": { "code_blocks": false }, // do not flag tabs inside code blocks
+  "MD009": { "strict": false }, // trailing spaces: keep relaxed
+  "MD012": { "maximum": 2 }, // consecutive blank lines
+  "MD025": { "front_matter_title": "" }, // don’t enforce title in front matter
+  "MD026": { "punctuation": ".,;:!?" }, // allowed punctuation for heading trailing punctuation
+}

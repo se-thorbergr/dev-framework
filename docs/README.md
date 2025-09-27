@@ -19,9 +19,9 @@ Authoritative contracts that tooling must follow.
 ## Architecture & Planning
 
 - [Architecture Notes](arch/README.md) – evolving design for OS core, components, and modules.
-- [Legacy Material](arch/VIOS.obsolete.md) – background documents to port into current design.
-- [TODO Plan](TODO.md) – prioritised backlog tracking documentation, tooling, and policy work.
+- [TODO Plan](TODO.md) – prioritized backlog tracking documentation, tooling, and policy work.
 
 ## Getting Started
 
-New contributors should begin with [docs/GettingStarted.md](GettingStarted.md) which ties the workflow, policy, and tooling specs together.
+New contributors should begin with **[Getting Started](GettingStarted.md)**, which ties the workflow, policy, and tooling specs together.
+See also **[Contributing](CONTRIBUTING.md)** for commit, review, and CI expectations.

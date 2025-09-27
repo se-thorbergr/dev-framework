@@ -13,10 +13,10 @@ The idea is to provide a modular library for SE programming. Think of it like an
 ### Development Environment
 
 - Windows
-- Linux
-- Powershell or Bash (Windows & Linux)
-- Visual Studio Code (Windows & Linux)
-- GPT Codex support (Codex cli or VSCode extension) for coding
+- Linux / WSL (Debian/Ubuntu)
+- PowerShell 7.x or Bash
+- Visual Studio Code
+- GPT Codex support (CLI or VS Code extension), optional
 
 ## Git Super-Repo
 
@@ -25,15 +25,15 @@ The **dev-framework** is the **super-repo** providing the _development framework
 It includes:
 
 - tools (project and CI helper tools)
-  - Tools to scaffold new projects (wrappers to the MDK2 toolkit).
-  - Tools to scaffold git submodules (for PBScript and Mixin projects)
+  - - Tools to scaffold new projects (wrappers around the MDK2 toolkit)
+  - Tools to scaffold Git submodules (for PB-script and Mixin projects)
   - Tools for GitHub CI workflows (Policy Gates)
 - docs (policies, architecture, specs, guides, AI prompts)
-- github CI (workflows / github actions)
+- GitHub CI (workflows / GitHub Actions)
 
 The MDK2 Programmable Block Scripts and Mixins are not directly contained in this super-repo. Each part of the library and each script/program has its own project in separated submodules linked to the super-repo.
 
-The Development Framework itself is responsible for the projects/submodules management, build process, CI workflow, etc. and enforcing the policies alignment.
+The development framework manages submodules, build, and CI, and enforces policy alignment.
 
 ## Important Note
 
@@ -43,11 +43,11 @@ As we are in a new era of _AI_ I decided to make heavily use of _GPT Codex_ to t
 
 ## Getting Started
 
-see [Getting Started](docs/GettingStarted.md)
+See **[Getting Started](docs/GettingStarted.md)**
 
 ## Contributing
 
-see [Getting Started](docs/CONTRIBUTING.md)
+See **[Contributing](docs/CONTRIBUTING.md)**
 
 ---
 
@@ -60,7 +60,7 @@ see [Getting Started](docs/CONTRIBUTING.md)
 
 ## Credits
 
-- [MDK²-SE by @malforge](https://github.com/malforge/mdk2) - Appreciation and thanks for this great toolkit!
+- [MDK2-SE by @malforge](https://github.com/malforge/mdk2) - Appreciation and thanks for this great toolkit!
 
 ---
 

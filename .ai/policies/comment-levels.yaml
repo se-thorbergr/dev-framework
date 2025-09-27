@@ -1,0 +1,19 @@
+# .ai/policies/comment-levels.yaml — controls @comment-level behavior
+# Precedence: pragma in file > pins > overrides > default
+# Note: Levels control **verbosity** (how much to say), not **editorial voice**. When generating human-facing docs, use second person and active voice as per AGENTS.md.
+
+defaults:
+  mode: minimal
+
+overrides:
+  - paths: ["**/README.md"]
+    mode: verbose
+  - paths: ["tools/**"]
+    mode: standard
+  - paths: ["source/**"]
+    mode: minimal
+
+# Highest priority after pragma
+pins: []
+
+precedence: [pragma, pins, overrides, default]

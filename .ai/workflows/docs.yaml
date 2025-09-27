@@ -1,0 +1,33 @@
+# .ai/workflows/docs.yaml — AI golden order for docs (machine-readable)
+# Humans follow docs/policy/Workflow.md; agents follow this file.
+# Reads ${MODE} from core.yaml; SE mode may skip local tools; CI enforces. Scope: Markdown; staged-only; use repo-local Prettier via `npx`.
+
+mode_guard:
+  mode_var: "${MODE}"
+  se:
+    format: skip
+    lint: validate_or_skip
+    writes: none
+    message: "Reads ${MODE} from core.yaml; in SE mode, skipping local docs tools; CI enforces."
+
+golden_order:
+  - select_files: "staged within docs scope (*.md, *.markdown)"
+  - format:
+      when: "${MODE} != se"
+      markdown: "npx prettier --write <staged md>"
+  - lint:
+      when: "${MODE} != se"
+      markdown: "markdownlint <staged md>"
+  - link_check:
+      when: "${MODE} == tooling"
+      markdown: "markdown-link-check --quiet <staged md>" # optional; can be CI-only
+  - verify_trace: true # capture commands + diffs into .ai/handoffs/
+  - present_plan: true
+  - commit_rules:
+      conventional: true
+      subject_format: "docs(<area>): summary"
+      trailer: "[ai-edit]"
+notes:
+  - "Do not reflow long lists/tables unless necessary; respect MD013 override."
+  - "Reads ${MODE} from core.yaml; in SE mode, local docs tools are skipped; CI enforces formatting and linting."
+  - "Never touch non-doc files in this workflow."

@@ -1,0 +1,40 @@
+# .ai/workflows/config.yaml — AI golden order for config files (machine-readable)
+# Humans follow docs/policy/Workflow.md; agents follow this file.
+# Reads ${MODE} from core.yaml; SE mode may skip local tools; CI enforces. For INI/MDK INI read-only rules, see .ai/policies/file-policy.yaml.
+
+mode_guard:
+  mode_var: "${MODE}"
+  se:
+    format: skip
+    lint: validate_or_skip
+    writes: none
+    message: "Reads ${MODE} from core.yaml; in SE mode, skipping local config format; CI enforces."
+
+golden_order:
+  - select_files: "staged within config scope (*.yml, *.yaml, *.json, *.ini, *.mdk.ini)"
+  - format:
+      when: "${MODE} != se"
+      yaml:  "npx prettier --write <staged yml/yaml>"      # safe reflow for YAML
+      json:  "npx prettier --write <staged json>"          # safe reflow for JSON
+      ini:   "skip"                                        # preserve order/comments
+      mdkini:"skip"                                        # preserve order/comments
+  - lint:
+      yaml:  "yamllint <staged yml/yaml>"
+      json:  "jq '.' <each staged json> > /dev/null"       # structural validation
+      ini:   "echo 'ini: validate manually or with project-safe checker' && true"
+      mdkini:"echo 'mdk.ini: validate manually; do not rewrite' && true"
+  - schema_validate:
+      yaml:  "echo 'optional: ajv/yamale/kubeval/etc.' && true"   # placeholder; CI-only if added
+      json:  "echo 'optional: ajv schema validation' && true"
+  - verify_trace: true    # capture commands + diffs into .ai/handoffs/
+  - present_plan: true
+  - commit_rules:
+      conventional: true
+      subject_format: "config(<area>): summary"
+      trailer: "[ai-edit]"
+notes:
+  - "Reads ${MODE} from core.yaml; in SE mode, local config formatting is skipped; CI enforces formatting and validation."
+  - "INI / MDK INI are read-only; see .ai/policies/file-policy.yaml."
+  - "Staged-only edits; obey .gitignore."
+  - "If a file matches both docs and config, prefer 'config' scope (more conservative)."
+  - "If 'yamllint' or 'jq' are unavailable locally, run these checks in CI or skip gracefully; this workflow already degrades without failing."

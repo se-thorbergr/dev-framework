@@ -1,0 +1,27 @@
+# dev-framework ShellCheck configuration (tools/shell/shellcheckrc)
+#
+# Purpose
+# - Keep shell script checks predictable across local runs and CI.
+# - In `${MODE} == se` (Space Engineers mode), local tooling may skip running
+#   ShellCheck; CI will still enforce checks.
+#
+# Format
+# - One ShellCheck CLI flag per line.
+# - Lines starting with `#` are comments.
+# - These flags are merged with wrapper-provided defaults.
+#
+# Baseline settings (safe, conservative)
+-s bash            # analyze scripts as Bash by default
+-S style           # report style issues and above (info-level)
+-x                 # follow 'source' to find referenced files (best-effort)
+
+# Common project toggles (uncomment as needed)
+# --external-sources   # allow non-local 'source' files (use with care)
+# -e SC1090,SC1091     # suppress dynamic source path warnings if paths are resolved by wrappers
+# -e SC2154            # suppress 'var is referenced but not assigned' when env injection is intentional
+# -e SC2001            # if sed 's///' is intentional and alternative is noisy
+
+# Notes
+# - Tooling wrappers will respect `${MODE}` from core.yaml runtime_vars and may skip
+#   ShellCheck locally in SE mode; CI runs the full check.
+# - Keep disables minimal; prefer fixing scripts or teaching wrappers to resolve paths.

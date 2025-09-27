@@ -1,3 +1,5 @@
+> Tone: second person, active, imperative; precise and concise.
+
 # Policy Index
 
 Policies define the rules we expect contributors and tooling to follow. Keep them in sync with their corresponding specifications.
@@ -10,7 +12,7 @@ Policies define the rules we expect contributors and tooling to follow. Keep the
 
 ## Usage
 
-- Specs under `docs/spec/` implement these policies. Whenever behaviour changes, update both the policy and the relevant spec.
+- Specs under `docs/spec/` implement these policies. Whenever behavior changes, update both the policy and the relevant spec.
 - AGENTS.md or other project prompts should reference these policies rather than duplicating rules.
 
 ## Maintenance

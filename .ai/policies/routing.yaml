@@ -1,0 +1,95 @@
+# .ai/policies/routing.yaml
+# Human policies live under docs/policy/*.md. This file aggregates AI-only configs.
+
+version: 1
+
+# 1) Scopes decide WHICH workflow runs
+scopes:
+  ci:
+    include: [".github/workflows/**/*.ya?ml"]
+  config:
+    include: ["**/*.{yaml,yml,json,ini}"]
+    exclude: ["**/*.mdk.ini"] # See .ai/policies/file-policy.yaml for read-only handling (overrides map MDK INI to config).
+  docs:
+    include: ["**/*.{md,markdown}"]
+  code:
+    include: ["**/*.cs", "tools/**/*.{ps1,psm1,psd1,sh}"]
+  binaries:
+    include: ["**/*.{png,jpg,jpeg,gif,ico,zip,7z,pdf,dll,exe,tiff,otf,wasm}"]
+
+# If multiple scopes match, pick the first by priority:
+priority: ["ci", "config", "docs", "code", "binaries"]
+default_scope: "code"
+
+# Optional hard overrides for special folders/files
+overrides:
+  - paths: ["docs/policy/**", "AGENTS.md"]
+    scope: "docs"
+  - paths: ["**/*.mdk.ini"]
+    scope: "config"
+
+# 2) Types decide WHICH tools/linters apply inside the chosen scope
+types:
+  markdown:
+    include: ["**/*.{md,markdown}"]
+    formatter: { tool: "npx prettier", args: ["--write"] }
+    linters:
+      - { tool: "markdownlint", args: ["--config", ".markdownlint.jsonc"] }
+  yaml:
+    include: ["**/*.{yaml,yml}"]
+    formatter: { tool: "npx prettier", args: ["--write"] }
+    linters:
+      - { tool: "yamllint", args: [] }
+  json:
+    include: ["**/*.json"]
+    formatter: { tool: "npx prettier", args: ["--write"] }
+    linters:
+      - { tool: "jq", args: ["."], mode: "validate" }
+  ini:
+    include: ["**/*.ini", "**/*.mdk.ini"]
+    # Caution: do NOT auto-rewrite order/comments
+    formatter: { tool: "none" }
+    linters: []
+  csharp:
+    include: ["**/*.cs"]
+    formatter: { tool: "dotnet", args: ["format", "--no-restore"] }
+    linters:
+      - { tool: "dotnet", args: ["build", "-warnaserror"] }
+  powershell:
+    include: ["tools/**/*.{ps1,psm1,psd1}"]
+    formatter: { tool: "pwsh", args: ["-NoProfile", "-Command", "Import-Module PSScriptAnalyzer; Invoke-Formatter -ScriptDefinition (Get-Content -Raw $Env:AI_FILE) -Settings tools/pssa/PSScriptAnalyzerSettings.psd1 | Set-Content -NoNewline -Encoding utf8 $Env:AI_FILE"] }
+    linters:
+      - { tool: "pwsh", args: ["-NoProfile", "-Command", "Invoke-ScriptAnalyzer -Path $Env:AI_FILE -Settings tools/pssa/PSScriptAnalyzerSettings.psd1 -Fix; Invoke-ScriptAnalyzer -Path $Env:AI_FILE -Settings tools/pssa/PSScriptAnalyzerSettings.psd1 -EnableExit"] }
+  bash:
+    include: ["tools/**/*.sh", "**/*.sh"]
+    formatter: { tool: "shfmt", args: ["-w"] }
+    linters:
+      - { tool: "shellcheck", args: [] }
+
+# 3) Map scopes to workflows (which golden-order file to run)
+workflow_map:
+  code: ".ai/workflows/code.yaml"
+  docs: ".ai/workflows/docs.yaml"
+  config: ".ai/workflows/config.yaml" # optional; create this if you split configs
+  ci: ".ai/workflows/config.yaml" # usually same as config, stricter checks
+  binaries: "none"
+
+# 4) Global boundaries (aligns with your file-policy)
+boundaries:
+  obey_gitignore: true
+  writes: "staged" # staged-only edits; no repo-wide formats
+  read_only_exceptions:
+    - ".ai/handoffs/**"
+    - ".ai/matrices/**"
+
+# 5) Precedence rules
+precedence:
+  - "pragma" # e.g., top-of-file: '# @scope: config' or '# @type: ini'
+  - "overrides" # explicit path overrides above
+  - "scopes" # by priority order
+  - "default" # default_scope
+
+notes:
+  - "Docs use repo-local Prettier via npx."
+  - "INI / MDK INI are read-only; see .ai/policies/file-policy.yaml. No auto-rewrite."
+  - "If a file matches multiple types, pick the first defined here."
