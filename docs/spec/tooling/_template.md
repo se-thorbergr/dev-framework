@@ -1,8 +1,8 @@
 > Tone: normative (MUST/SHOULD/MAY); use second person only in step-by-step instructions.
 
-# <Tool Name> Specification
+# &lt;Tool Name&gt; Specification
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -119,3 +119,4 @@ Optional columns: **Exit Code** and **Area** (e.g., `git`, `dotnet`, `fs`) to sp
 | Date       | Change                                                                                          | Approved By |
 | ---------- | ----------------------------------------------------------------------------------------------- | ----------- |
 | 2025-09-28 | Set SoT date; confirmed 15-section structure and RFC-2119 note; ready for downstream reference. | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                   | geho        |

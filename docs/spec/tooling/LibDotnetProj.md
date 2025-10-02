@@ -2,7 +2,7 @@
 
 # LibDotnetProj Specification
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -148,3 +148,4 @@ The **Model** MUST expose, at minimum:
 | 2025-09-27 | Initial `LibDotnetProj` spec following common template; Section 4 set to **API contract**; planning-only, no side effects. | geho        |
 | 2025-09-28 | Added Spec Template (SoT) reference to Section 1.1; aligned with Spec Authoring Policy; no behavioral changes.             | geho        |
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                      | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                              | geho        |

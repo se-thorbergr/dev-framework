@@ -2,7 +2,7 @@
 
 # Tooling General Specification
 
-_Last updated: 2025-09-30 - Owner: geho_
+Last updated: 2025-09-30 - Owner: geho
 
 ## 1. Scope
 
@@ -148,12 +148,16 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 ## 14. Open Questions / Future Enhancements
 
-**Open questions**
+### Open questions
 
-- Should the **Local vs CI/GitHub** execution matrix live in _ToolingGeneral_ only, or be elevated to **Environment Policy** with a machine-readable twin in `.ai/policies/modes.yaml`? Decide the single SoT and cross-references.
-- Which additional package managers (e.g., `choco`, `brew`, `dnf`, `pacman`, `zypper`) should be supported in local mode, and what **security/manual-first** rules must apply per manager?
+- None.
 
-**Future enhancements**
+### Resolved decisions
+
+- Local vs CI/GitHub execution matrix stays in ToolingGeneral; `.ai/policies/modes.yaml` remains a supporting reference only.
+- Debian/Ubuntu `apt` is the sole sanctioned package manager for local mode at this time.
+
+### Future enhancements
 
 - Add structured summary outputs: `--summary-format json` (stdout) and `--summary-json <path>` (opt-in file) with a stable schema; reflect in Section 4/Section 8/Section 10 and LibCli.
 - Publish a small **PS/Bash parity coverage matrix** for shared libraries (what’s implemented/tested).
@@ -178,3 +182,4 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-30 | Clarified CI stance for Bin64: skip discovery in validation and mark as not applicable on CI runners.                                                                 | geho        |
 | 2025-09-30 | Added Section 5.2 summary matrix for Local vs CI/GitHub behavior.                                                                                                     | geho        |
 | 2025-09-30 | Added SoT pointer in Section 5 to `.ai/policies/core.yaml → modes`.                                                                                                   | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting, resolved markdownlint findings, and documented Section 14 decisions.                                                       | geho        |

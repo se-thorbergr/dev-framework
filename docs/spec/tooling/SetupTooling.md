@@ -2,7 +2,7 @@
 
 # Setup Tooling Specification
 
-_Last updated: 2025-09-30 - Owner: geho_
+Last updated: 2025-09-30 - Owner: geho
 
 ## 1. Scope
 
@@ -72,7 +72,7 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
 
 > **Execution-mode SoT:** Local vs CI/GitHub behavior is authoritative in `.ai/policies/core.yaml` → `modes`. This spec mirrors the summary only.
 
-**Local vs CI/GitHub behavior matrix**
+### Local vs CI/GitHub behavior matrix
 
 | Area               | Local (dev)                                      | CI/GitHub Actions                                                 |
 | ------------------ | ------------------------------------------------ | ----------------------------------------------------------------- |
@@ -150,7 +150,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 - Missing or invalid `binarypath`: prompt for manual input when interactive; otherwise instruct the developer to supply `--binary-path` or update `se-config.local.ini`. Auto-detection failures should list attempted locations and suggest using helper options (`--steam-path`, `--game-path`).
 - Missing dependency with auto-install declined/failing (or `--notes-only` active): emit specific remediation commands per OS and exit 1 once checks complete.
-- Path resolution failures: provide contextual messages (e.g., "Could not locate Steam under <paths>") for helper lookups and reiterate manual input requirements.
+- Path resolution failures: provide contextual messages (e.g., "Could not locate Steam under &lt;paths&gt;") for helper lookups and reiterate manual input requirements.
 - dotnet/winget/apt/npm command failures: surface exit codes/output, preserve existing files, and advise re-run after problem is addressed. Automated install attempts must report lack of privileges and recommend re-running with elevation or manual install.
 - Unexpected exceptions: log stack trace in debug mode and guide the developer to re-run with `--verbose debug` if not already enabled.
 
@@ -186,7 +186,12 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 ## 14. Open Questions / Future Enhancements
 
-- Need to define additional package manager support beyond winget/apt as the contributor base grows.
+### Resolved decisions
+
+- Package manager support remains scoped to winget (Windows) and Debian/Ubuntu apt as of 2025-10-02; revisit only if new environments require it.
+
+### Future enhancements
+
 - Opportunity to emit structured JSON summary for future automation pipelines.
 
 ## 15. Change Log
@@ -215,3 +220,5 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-28 | Standardized verbosity: added `--debug` alias note in Sections 4 and 7.                                                     | geho        |
 | 2025-09-30 | Clarify Local vs CI split: scope note, workflow matrix, and CI guardrails in Section 7; no behavioral change to local flow. | geho        |
 | 2025-09-30 | Added SoT pointer in Section 5 to `.ai/policies/core.yaml → modes`.                                                         | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                               | geho        |
+| 2025-10-02 | Documented Section 14 decision on package manager scope and noted JSON summary enhancement as future work.                  | geho        |

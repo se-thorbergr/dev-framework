@@ -2,7 +2,7 @@
 
 # Tooling Specs - Index & Guide
 
-_Last updated: 2025-09-30 - Owner: geho_
+Last updated: 2025-09-30 - Owner: geho
 
 This index lists all **tooling specifications** and how they relate. Use it to navigate contracts, domain libraries, and tool-specific specs.
 
@@ -43,7 +43,7 @@ This index lists all **tooling specifications** and how they relate. Use it to n
 - **Tooling General Notes** - `docs/spec/tooling/ToolingGeneral.md` _(contract; see Section 1)_
 
 > For **Local vs CI/GitHub** execution behavior, see the matrices in `ToolingGeneral.md` Section 5 and `SetupTooling.md` Section 5. Authoritative SoT: `.ai/policies/core.yaml` → `modes`.
-
+>
 > New tools MUST follow the CLI contract and SHOULD reuse domain libraries above.
 
 ---
@@ -66,3 +66,4 @@ This index lists all **tooling specifications** and how they relate. Use it to n
 | 2025-09-28 | Add architecture note pointing to `docs/arch/README.md` in Section 1.                                    | geho        |
 | 2025-09-30 | Add link to Local vs CI/GitHub behavior matrices in ToolingGeneral Section 5 and SetupTooling Section 5. | geho        |
 | 2025-09-30 | Wording: 'canvas names' → 'session/editing identifiers'; add execution-mode SoT pointer.                 | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                            | geho        |

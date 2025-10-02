@@ -17,7 +17,7 @@ golden_order:
       markdown: "npx prettier --write <staged md>"
   - lint:
       when: "${MODE} != se"
-      markdown: "markdownlint -c .markdownlint.jsonc <staged md>"
+      markdown: "npx markdownlint -c .markdownlint.jsonc <staged md>"
   - link_check:
       when: "${MODE} == tooling"
       markdown: "markdown-link-check --quiet <staged md>" # optional; can be CI-only

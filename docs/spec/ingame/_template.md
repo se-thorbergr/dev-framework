@@ -1,8 +1,8 @@
 > Tone: normative (MUST/SHOULD/MAY, RFC 2119); ASCII-only punctuation; use second person only in step-by-step instructions.
 
-# <In-game Spec: Title>
+# &lt;In-game Spec: Title&gt;
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -105,6 +105,7 @@ _Last updated: 2025-09-28 - Owner: geho_
 
 > **Policy:** Append new entries at the bottom; do not rewrite history.
 
-| Date       | Change                                                        | Approved By |
-| ---------- | ------------------------------------------------------------- | ----------- |
-| 2025-09-28 | Initial in-game spec template created (profile: `se_ingame`). | geho        |
+| Date       | Change                                                                        | Approved By |
+| ---------- | ----------------------------------------------------------------------------- | ----------- |
+| 2025-09-28 | Initial in-game spec template created (profile: `se_ingame`).                 | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings. | geho        |

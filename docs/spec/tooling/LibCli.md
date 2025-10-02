@@ -2,7 +2,7 @@
 
 # LibCli Specification
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -43,9 +43,9 @@ _Last updated: 2025-09-28 - Owner: geho_
 | `Initialize-Cli`  | `-Args string[]`                                                                           | object `{ Flags; UnknownArgs; Logger; Summary }` | Parses common flags; sets defaults. No writes; no exit.      |
 | `Write-Log`       | `-Level ('quiet'\|'info'\|'debug') -Message string`                                        | `void`                                           | Level-aware logging; MUST be ASCII-only.                     |
 | `Add-SummaryItem` | `-Kind string -Message string -Data object?`                                               | `void`                                           | Collects summary entries for deferred emit.                  |
-| `Emit-Summary`    | _(none)_                                                                                   | `void`                                           | Prints aggregated summary when requested.                    |
+| `Emit-Summary`    | `-Format ('text'\|'json')? -OutputPath string?`                                            | `void`                                           | Emits summary: plain text by default; JSON when requested.   |
 | `Emit-Help`       | _(none or context)_                                                                        | string                                           | Returns stable, parseable help text; caller prints.          |
-| `Emit-Version`    | `-Version string -Commit string?`                                                          | string                                           | Returns stable version line(s); caller prints.               |
+| `Emit-Version`    | `-Version string -Commit string? -ApiVersion string`                                       | string                                           | Returns stable version info including `api_version`.         |
 | `Annotate-CI`     | `-Level ('notice'\|'warning'\|'error') -Message string -File string? -Line int? -Col int?` | `void`                                           | Formats CI annotations when CI is detected; no-op otherwise. |
 | `Make-Error`      | `-Code int -Message string -Area string?`                                                  | object `{ Code; Message; Area }`                 | Structured error object; library does not exit.              |
 
@@ -53,16 +53,16 @@ _Last updated: 2025-09-28 - Owner: geho_
 
 > **Notation:** Space-separated positional arguments; callers MUST quote each argument. Do not use comma-separated pseudo-lists.
 
-| Function       | Parameters (positional)                 | Returns                                                         | Notes                                     |
-| -------------- | --------------------------------------- | --------------------------------------------------------------- | ----------------------------------------- |
-| `cli_init`     | `$@`                                    | associative array: `flags`, `unknown_args`, `logger`, `summary` | Parse common flags; set defaults.         |
-| `log`          | `<level> <message>`                     | none                                                            | Level-aware logging; ASCII-only.          |
-| `summary_add`  | `<kind> <message> [data]`               | none                                                            | Collects summary entries.                 |
-| `summary_emit` | _(none)_                                | none                                                            | Emits aggregated summary.                 |
-| `help_emit`    | _(none or context)_                     | stdout string                                                   | Stable, parseable help text.              |
-| `version_emit` | `<version> [commit]`                    | stdout string                                                   | Stable version line(s).                   |
-| `ci_annotate`  | `<level> <message> [file] [line] [col]` | none                                                            | Formats CI annotations if CI is detected. |
-| `error_make`   | `<code> <message> [area]`               | printf JSON-ish or delimited                                    | Structured error; caller decides exit.    |
+| Function       | Parameters (positional)                 | Returns                                                         | Notes                                                  |
+| -------------- | --------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| `cli_init`     | `$@`                                    | associative array: `flags`, `unknown_args`, `logger`, `summary` | Parse common flags; set defaults.                      |
+| `log`          | `<level> <message>`                     | none                                                            | Level-aware logging; ASCII-only.                       |
+| `summary_add`  | `<kind> <message> [data]`               | none                                                            | Collects summary entries.                              |
+| `summary_emit` | `[format] [output_path]`                | none                                                            | Emits summary (text default, JSON when `format=json`). |
+| `help_emit`    | _(none or context)_                     | stdout string                                                   | Stable, parseable help text.                           |
+| `version_emit` | `<version> [commit] [api_version]`      | stdout string                                                   | Stable version info including `api_version`.           |
+| `ci_annotate`  | `<level> <message> [file] [line] [col]` | none                                                            | Formats CI annotations if CI is detected.              |
+| `error_make`   | `<code> <message> [area]`               | printf JSON-ish or delimited                                    | Structured error; caller decides exit.                 |
 
 **Quoting rule:** Call like `log "info" "starting..."` and `ci_annotate "warning" "msg" "$file" 12 3`. Omit optionals by leaving them out.
 
@@ -88,8 +88,9 @@ Typical consumer usage pattern:
 1. Call `Initialize-Cli`/`cli_init` with raw args; receive normalized flags + logger + summary handle.
 2. Use `Write-Log`/`log` for user-visible messages at appropriate levels; avoid secrets.
 3. If `--dry-run` is set, ensure downstream actions are simulated only; record via `Add-SummaryItem`.
-4. When `--summary` is set, call `Emit-Summary`/`summary_emit` as the final step.
+4. When `--summary` is set, call `Emit-Summary`/`summary_emit` as the final step, passing `json`/output path when structured data is requested.
 5. For `--help`/`--version`, the **tool** prints the strings returned by the lib and exits with code `0`.
+6. When `--summary-json <path>` is provided, write the returned JSON buffer to the path after calling the helper.
 
 ## 6. Configuration Handling
 
@@ -102,6 +103,8 @@ Typical consumer usage pattern:
 - The library **MUST NOT** call `exit`/`throw` to terminate the process.
 - All outputs **MUST** be ASCII-only and deterministic given the same inputs.
 - `--help`/`--version` outputs **MUST** be **stable and parseable** for automated tests.
+- `Emit-Version` / `version_emit` outputs **MUST** include `api_version` alongside tool version metadata.
+- `Emit-Summary` / `summary_emit` **MUST** support schema v1 JSON output (ASCII-only, deterministic keys) when requested via flags.
 - CI annotations **MUST** conform to the detected CI format when in CI; otherwise they **MUST** degrade gracefully to plain logs.
 - PowerShell and Bash implementations **MUST** maintain behavior parity.
 - The parser **MUST** accept `--debug` as an alias for `--verbose debug`.
@@ -109,7 +112,7 @@ Typical consumer usage pattern:
 ## 8. Outputs
 
 - Console output routed via logging functions respecting verbosity.
-- Optional summary block emitted only when `--summary` is present.
+- Optional summary block emitted only when `--summary` is present. Text is default; JSON follows schema v1 when `--summary-format json` / `--summary-json <path>` is set.
 - CI annotations emitted only when `--ci` is set or CI is detected.
 
 ## 9. Failure Modes & Recovery
@@ -122,15 +125,16 @@ Typical consumer usage pattern:
 
 ## 10. Validation
 
-- Unit tests for parsing, logging levels, summary aggregation, help/version stability.
-- Integration tests in consumer tools confirming `--dry-run` produces **no side effects**.
+- Unit tests for parsing, logging levels, summary aggregation (text + JSON), and help/version stability (including `api_version`).
+- Integration tests in consumer tools confirming `--dry-run` produces **no side effects** and that JSON summaries match schema v1.
 - PS (Pester) and Bash (bats) parity tests producing identical expected outputs.
 
 ## 11. Acceptance Criteria
 
 - Public functions present with documented parameters and return shapes.
-- Help/version outputs match golden snapshots across shells.
-- Summary emission occurs only with `--summary` and contains recorded items.
+- Help/version outputs match golden snapshots across shells and include `api_version`.
+- Summary emission occurs only with `--summary`, yields deterministic text output by default, and produces schema v1 JSON when requested.
+- JSON summary tests cover happy path, CI metadata, and error aggregation parity across shells.
 - No direct process termination; callers control exit codes.
 
 ## 12. Security & Permissions
@@ -145,9 +149,9 @@ Typical consumer usage pattern:
 
 ## 14. Open Questions / Future Enhancements
 
-- JSON summary schema vs. plain text: should `Emit-Summary` provide structured (machine-readable) output?
 - CI providers: standardize adapter interface to add new providers beyond GitHub Actions?
-- Version reporting: include library api_version in `Emit-Version` output?
+
+Resolved: `Emit-Summary` JSON support and `api_version` in `Emit-Version` documented in Sections 4, 7, 8, and 11.
 
 ## 15. Change Log
 
@@ -160,3 +164,5 @@ Typical consumer usage pattern:
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                         | geho        |
 | 2025-09-28 | Standardized verbosity: treat `--debug` as an alias for `--verbose debug`; documented in Sections 4 and 7.                                    | geho        |
 | 2025-09-28 | Bash API table: switch to positional argument notation and add quoting rule.                                                                  | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                 | geho        |
+| 2025-10-02 | Documented JSON summary behavior and api_version reporting in Sections 4, 7, 8, and 11; closed open questions.                                | geho        |

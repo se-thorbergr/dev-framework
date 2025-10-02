@@ -2,7 +2,7 @@
 
 # LibConfig Specification
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -152,3 +152,4 @@ The result MUST include **provenance**: which sources were used and their order.
 | 2025-09-28 | Added Spec Template (SoT) reference to Section 1.1; aligned with Spec Authoring Policy; no behavioral changes.                                | geho        |
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                         | geho        |
 | 2025-09-28 | Normalized punctuation to ASCII (hyphens and ellipses) across the spec.                                                                       | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                 | geho        |

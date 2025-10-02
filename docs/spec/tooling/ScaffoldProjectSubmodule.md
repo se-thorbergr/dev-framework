@@ -2,7 +2,7 @@
 
 # Scaffold Project Submodule Specification
 
-_Last updated: 2025-09-28 - Owner: geho_
+Last updated: 2025-09-28 - Owner: geho
 
 ## 1. Scope
 
@@ -168,3 +168,4 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                                                                                       | geho        |
 | 2025-09-28 | Removed `${MODE}` echo from Section 10 Validation (orthogonal to scaffolding); retained git/dotnet and template checks.                                                                                     | geho        |
 | 2025-09-28 | Standardized verbosity: added `--debug` alias note in Sections 4 and 7.                                                                                                                                     | geho        |
+| 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                                                                               | geho        |
