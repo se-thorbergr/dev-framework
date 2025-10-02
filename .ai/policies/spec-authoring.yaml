@@ -1,0 +1,202 @@
+# .ai/policies/spec-authoring.yaml — machine rules for authoring specs under docs/spec/**
+# Mirrors human policy in docs/policy/SpecAuthoring.md
+version: 2025-09-30
+requires:
+  - .ai/policies/core.yaml
+notes:
+  - "Aligns with docs/policy/SpecAuthoring.md and the 15-section template."
+  - "Consumes ${MODE} from core.yaml to choose profile rules (tooling vs se_ingame)."
+
+workspace:
+  use_var: "${MODE}"
+  profile_map:
+    se: se_ingame
+    tooling: tooling
+    auto: tooling
+
+
+applies_to:
+  - "docs/spec/**/*.md"
+  - "docs/spec/**/_template.md"
+
+# Source of truth references (for context loading / CI hints)
+source_of_truth:
+  template_default: "docs/spec/tooling/_template.md"
+  template_profiles:
+    tooling: "docs/spec/tooling/_template.md"
+    se_ingame: "docs/spec/ingame/_template.md"
+  human_policy: "docs/policy/SpecAuthoring.md"
+
+profiles:
+  default: tooling
+  recognized:
+    - tooling
+    - se_ingame
+
+# Hard requirements. CI should fail if any rule in `must` is violated.
+rules:
+  must:
+    # 0) ASCII-only punctuation for specs/policies
+    - id: ascii-only
+      where: "docs/spec/**/{*,*/*.md}"
+      check: ascii_punctuation_only
+      message: "Specs must use ASCII punctuation; normalize quotes/dashes/ellipsis."
+
+    # 1) Top metadata banner presence and freshness
+    - id: top-banner-present
+      where:
+        - "docs/spec/**/{*,*/*.md}"
+        - "!docs/spec/**/README.md"
+      check: regex
+      pattern: "^_Last updated: [0-9]{4}-[0-9]{2}-[0-9]{2} - Owner: .+_\n"
+      anchors: [start]
+      message: "Add top metadata banner: '_Last updated: YYYY-MM-DD - Owner: <name>_'."
+
+    - id: changelog-policy-line
+      check: contains
+      text: "> **Policy:**"
+      section: "^##\s*15\.\s*Change Log"
+      message: "Keep the changelog policy line immediately above the table."
+
+    # 2) Section headings: exact order, with allowed variants
+    - id: sections-order
+      where:
+        - "docs/spec/**/{*,*/*.md}"
+        - "!docs/spec/**/README.md"
+      check: section_order
+      order:
+        - "1. Scope"
+        - "2. Preconditions & Assumptions"
+        - "3. Shared Responsibilities"
+        - variants:
+            - "4. CLI Contract"
+            - "4. API Contract"
+            - "4. API Contract (SE ingame script)"
+          required: true
+        - "5. Workflow"
+        - "6. Configuration Handling"
+        - "7. Normative Requirements"
+        - "8. Outputs"
+        - "9. Failure Modes & Recovery"
+        - variants:
+            - "10. Validation"
+            - "10. Validation & Testing"
+          required: true
+        - "11. Acceptance Criteria"
+        - "12. Security & Permissions"
+        - "13. Telemetry & Logging (optional)"
+        - "14. Open Questions / Future Enhancements"
+        - "15. Change Log"
+      message: "Section headings must match the 15-section template (with allowed variants for 4 and 10)."
+
+    # 3) References block (Section 1.1) must cite SoT and human policy using filenames
+    - id: references-1-1
+      where:
+        - "docs/spec/**/{*,*/*.md}"
+        - "!docs/spec/**/README.md"
+      check: section_contains_all
+      section: "^##\s*1\.1\s*References"
+      required_substrings:
+        - "Spec Authoring Policy: docs/policy/SpecAuthoring.md"
+        - "Spec Template (SoT): docs/spec/"
+      message: "Section 1.1 must reference Spec Authoring Policy and the profile template (filenames only)."
+
+    # 4) Change Log row appended at bottom on edit
+    - id: changelog-row-today-or-later
+      where:
+        - "docs/spec/**/{*,*/*.md}"
+        - "!docs/spec/**/README.md"
+      check: changelog_append_only
+      table_header_regex: "^\|\s*Date\s*\|\s*Change\s*\|"
+      date_format: "YYYY-MM-DD"
+      message: "Append a new Change Log row at the bottom for each edit. Do not rewrite history."
+
+    # 5) No writes to protected files are promised by specs (guard language)
+    - id: read-only-statement
+      check: contains_any
+      section: "^##\s*7\.\s*Normative Requirements"
+      any:
+        - "MUST NOT write"
+        - "no writes"
+      message: "Normative requirements should include no-writes guarantees for libraries as applicable."
+
+    # 6) CI guardrails for tools that define a CI mode
+    - id: ci-guardrails
+      where:
+        - "docs/spec/tooling/ToolingGeneral.md"
+        - "docs/spec/tooling/SetupTooling.md"
+      check: section_contains_all
+      section: "^##\\s*7\\.\\s*Normative Requirements"
+      required_substrings:
+        - "In `--ci`"
+        - "MUST NOT prompt"
+        - "MUST NOT attempt installs"
+        - "MUST NOT persist"
+        - "exit non-zero"
+      message: "When CI mode is defined, Section 7 must state no prompts, no installs, no persistence, and define CI exit behavior."
+
+    # 7) CI: SE not present on runners
+    - id: ci-se-absence
+      where:
+        - "docs/spec/tooling/ToolingGeneral.md"
+        - "docs/spec/tooling/SetupTooling.md"
+      check: contains_any
+      section: "^##\\s*10\\."
+      any:
+        - "skip Bin64 discovery"
+        - "Not applicable (SE not present"
+      message: "When targeting CI, specs must mark Bin64 as not applicable and skip discovery."
+
+  should:
+    - id: local-vs-ci-matrix
+      where:
+        - "docs/spec/tooling/SetupTooling.md"
+      check: contains
+      section: "^##\\s*5\\."
+      text: "Local vs CI/GitHub"
+      message: "Recommend including a Local vs CI/GitHub behavior matrix when tools have mode-specific behavior."
+    - id: disallow-session-identifiers-in-refs
+      check: disallow_pattern
+      pattern: "`c1-[^`]+`" # disallow session/editing identifiers (e.g., transient chat/canvas names) in prose
+      message: "Use repository filenames in references; do not include session/editing identifiers."
+
+    - id: ps-bash-parity-note
+      check: contains
+      text: "parity"
+      section: "^##\s*3\.\s*Shared Responsibilities"
+      message: "Call out PS/Bash parity when relevant."
+
+    - id: debug-alias-note
+      check: contains_any
+      any:
+        - "`--debug` is a shorthand for `--verbose debug`"
+        - "--debug as an alias for --verbose debug"
+      section: "^##\s*4\.|^##\s*7\."
+      message: "Mention the `--debug` alias in CLI-related sections when applicable."
+
+# Validation engine hints (regex keys etc.). Implementers wire these to their linters.
+engine:
+  regex:
+    multiline: true
+    dotall: true
+  sections:
+    heading_regex: "^##\s*([0-9]+)\.\s*(.+)$"
+
+ci:
+  on_pull_request:
+    fail_on:
+      - ascii-only
+      - top-banner-present
+      - sections-order
+      - references-1-1
+      - changelog-row-today-or-later
+    warn_on:
+      - read-only-statement
+      - disallow-session-identifiers-in-refs
+      - ps-bash-parity-note
+      - debug-alias-note
+  messages:
+    sections-order: "Headings out of order or mismatched. Use the template and allowed variants for 4 and 10."
+    top-banner-present: "Add or update the top '_Last updated: ... - Owner: ..._' line."
+
+precedence: [pragma, pins, overrides, default]

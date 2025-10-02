@@ -44,6 +44,7 @@ indent_size = 4
 ## Language & text (human-facing)
 
 - **Language:** Use English (US) in all human-facing docs, commit messages, and in-repo prose. Keep dialect consistent within a document.
+- **Emojis:** Allowed in `README.md` files (top-level and subfolders) for clarity/tone. Keep usage sparse and accessible (do not replace essential words).
 - **ASCII-only punctuation (default):**
   - **Dashes:** use `-` (ASCII hyphen with spaces). Do not use en/em/figure dashes.
   - **Quotes:** use `'` and `"` (no smart quotes).

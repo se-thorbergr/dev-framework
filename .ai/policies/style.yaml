@@ -57,6 +57,10 @@ overrides:
   - paths: ["**/README.md"]
     punctuation:
       ascii_only: true
+    unicode:
+      strings:
+        ui_text_allowed: true
+        allow_emoji: true # README files may include emoji for tone/clarity
   - paths: ["docs/policy/**"]
     unicode:
       strings:

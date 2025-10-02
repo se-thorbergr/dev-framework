@@ -2,7 +2,7 @@
 
 # Scaffold MDK2 Project Specification
 
-_Last updated: 2025-09-27 - Owner: geho_
+_Last updated: 2025-09-28 - Owner: geho_
 
 ## 1. Scope
 
@@ -12,6 +12,8 @@ _Last updated: 2025-09-27 - Owner: geho_
 
 ## 1.1 References
 
+- Spec Authoring Policy: `docs/policy/SpecAuthoring.md`
+- Spec Template (SoT): `docs/spec/tooling/_template.md` (Last updated: 2025-09-28)
 - Environment Policy: `docs/policy/Environment.md`
 - Workflow Policy: `docs/policy/Workflow.md`
 - Coding Style Policy: `docs/policy/CodingStyle.md`
@@ -37,7 +39,7 @@ _Last updated: 2025-09-27 - Owner: geho_
 
 See `ToolingGeneral.md` for mandatory shared options. This tool documents only its additional flags below.
 
-All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change.
+All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change, and `--debug` is a shorthand for `--verbose debug`.
 
 | Purpose              | PowerShell               | Bash                       | Notes                                                   |
 | -------------------- | ------------------------ | -------------------------- | ------------------------------------------------------- |
@@ -81,6 +83,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - The tool **MUST** seed only keys that differ from the effective configuration into `.mdk.local.ini` (diff-only writes) and add a generated banner.
 - The tool **MUST** refuse destructive operations on existing non-empty target directories unless a future `--force` is explicitly provided.
 - CI **MUST NOT** build SE solutions; CI runs format/lint only. Initial build is **local-only**.
+- The tool **MUST** support `--debug` as an alias for `--verbose debug`.
 
 ## 8. Outputs
 
@@ -97,7 +100,6 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 ## 10. Validation
 
-- Print resolved `${MODE}` and its source (precedence: `.devfw-mode.local` → `DEVFW_MODE` → `.devfw-mode` → heuristic).
 - Verify `dotnet new --list` includes `Mal.Mdk2.ScriptTemplates` at `2.2.31` (template available for scaffolding).
 
 - Unit tests for argument parsing, path resolution, class stub generation.
@@ -141,3 +143,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-20 | Referenced ToolingGeneral shared CLI contract                                                                                                | geho        |
 | 2025-09-27 | Minor edits reviewed; pending fixes noted (section renumbering, MDK2 prose, optional exit-codes note).                                       | geho        |
 | 2025-09-27 | Final alignment: normalized US spelling (behavior/honor/summarizes) and added validation bullets for `${MODE}` echo and MDK2 template check. | geho        |
+| 2025-09-28 | Added Spec Template (SoT) reference to Section 1.1; aligned with Spec Authoring Policy; no behavioral changes.                               | geho        |
+| 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                        | geho        |
+| 2025-09-28 | Removed `${MODE}` echo from Section 10 Validation (orthogonal to scaffolding); kept template availability check.                             | geho        |
+| 2025-09-28 | Standardized verbosity: added `--debug` alias note in Sections 4 and 7.                                                                      | geho        |

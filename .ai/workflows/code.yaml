@@ -15,7 +15,7 @@ golden_order:
       pwsh_fix_then_verify: true
       bash_shellcheck_staged: true
       csharp_build_warnaserror: true
-  - build: "dotnet build -warnaserror"
+  - build: "dotnet build -warnaserror" # CI skips this; see ci_minimal_info_only
   - tests:
       dotnet: "dotnet test --nologo"
       pwsh: "Invoke-Pester tools/tests/pwsh -CI"

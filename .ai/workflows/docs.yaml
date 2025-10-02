@@ -17,7 +17,7 @@ golden_order:
       markdown: "npx prettier --write <staged md>"
   - lint:
       when: "${MODE} != se"
-      markdown: "markdownlint <staged md>"
+      markdown: "markdownlint -c .markdownlint.jsonc <staged md>"
   - link_check:
       when: "${MODE} == tooling"
       markdown: "markdown-link-check --quiet <staged md>" # optional; can be CI-only
@@ -28,6 +28,6 @@ golden_order:
       subject_format: "docs(<area>): summary"
       trailer: "[ai-edit]"
 notes:
-  - "Do not reflow long lists/tables unless necessary; respect MD013 override."
+  - "Respect repo .markdownlint.jsonc (MD013 and MD041 disabled). Do not reflow long lists/tables unless necessary."
   - "Reads ${MODE} from core.yaml; in SE mode, local docs tools are skipped; CI enforces formatting and linting."
   - "Never touch non-doc files in this workflow."

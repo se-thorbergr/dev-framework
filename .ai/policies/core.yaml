@@ -25,19 +25,36 @@ human_policy_refs:
 notes:
   - "This AI config is authoritative for agents."
   - "Workspace mode determines which tools run locally vs. CI."
+  - "DEPRECATION: .ai/specs/adapter.yaml is deprecated; mode resolution and execution behavior live here."
+
+# Execution modes — single source of truth for Local vs CI/GitHub behavior
+modes:
+  local:
+    installs: allowed # winget/apt etc. via flags; manual path first
+    prompts: allowed
+    build_se: allowed # Space Engineers builds are local-only
+    linters_formatters: optional
+    bin64_discovery: enabled
+    codex_setup: optional
+  ci:
+    installs: forbidden # no package managers in CI
+    prompts: none # non-interactive
+    build_se: forbidden # SE not present on runners
+    linters_formatters: required
+    bin64_discovery: skipped # not applicable on CI runners
+    codex_setup: not_used
+  ci_enforcement: true # CI always enforces docs/config checks
 
 # Workspace modes let SE-only developers avoid local non-.NET tooling
 workspace:
-  mode: auto   # one of: auto | se | tooling
+  mode: auto # one of: auto | se | tooling
   detection_order:
-    - file: .devfw-mode.local   # developer override (gitignored)
-    - env: DEVFW_MODE           # environment override
-    - file: .devfw-mode         # repo default (committed)
-    - heuristic: mdk2_only_repo  # fallback if solution contains only MDK2/C#
+    - file: .devfw-mode.local # developer override (gitignored)
+    - env: DEVFW_MODE # environment override
+    - file: .devfw-mode # repo default (committed)
+    - heuristic: mdk2_only_repo # fallback if solution contains only MDK2/C#
   scope_precedence: [config, docs, code]
-  ci_enforcement: true  # CI always runs full docs/config checks
-  scope_precedence: [config, docs, code]
-  ci_enforcement: true  # CI always runs full docs/config checks
+  ci_enforcement: true # CI always runs full docs/config checks (mirrors modes.ci_enforcement)
 
 # Tool requirements by mode (used by agents and wrappers)
 tools:

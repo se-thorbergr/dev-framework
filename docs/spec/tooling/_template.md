@@ -2,7 +2,7 @@
 
 # <Tool Name> Specification
 
-_Last updated: YYYY-MM-DD - Owner: <name/contact>_
+_Last updated: 2025-09-28 - Owner: geho_
 
 ## 1. Scope
 
@@ -11,6 +11,8 @@ _Last updated: YYYY-MM-DD - Owner: <name/contact>_
 
 ## 1.1 References
 
+- Spec Authoring Policy: `docs/policy/SpecAuthoring.md`
+- Spec Template (SoT): `docs/spec/tooling/_template.md` (Last updated: 2025-09-28)
 - Environment Policy: `docs/policy/Environment.md`
 - Workflow Policy: `docs/policy/Workflow.md`
 - Coding Style Policy: `docs/policy/CodingStyle.md`
@@ -114,6 +116,6 @@ Optional columns: **Exit Code** and **Area** (e.g., `git`, `dotnet`, `fs`) to sp
 
 > **Policy:** On every spec edit, the author/AI **MUST** append a new row **at the bottom** (chronological top→bottom) with date, summary, and approver.
 
-| Date | Change | Approved By |
-| ---- | ------ | ----------- |
-|      |        |             |
+| Date       | Change                                                                                          | Approved By |
+| ---------- | ----------------------------------------------------------------------------------------------- | ----------- |
+| 2025-09-28 | Set SoT date; confirmed 15-section structure and RFC-2119 note; ready for downstream reference. | geho        |

@@ -9,7 +9,7 @@ agents:
   ci_block_on_violation: true # CI fails if rails are violated
 
 edit_safety:
-  require_open_canvas: true # only edit a canvas the user has opened
+  require_explicit_file_targets: true # only edit files explicitly named by the user or selected by policy/workflow
   forbid_background_edits: true # no async/deferred edits; operate only in current turn
   batch_abort_on_mismatch: true # if any targeted pattern misses, abort the whole batch
   minimal_diffs: true # keep changes small and targeted
@@ -19,7 +19,7 @@ edit_safety:
 
 preflight:
   - "refresh_cache" # pull latest canonical state
-  - "detect_active_canvas" # verify opened canvas matches the intended target
+  - "resolve_file_targets" # verify intended file targets are unambiguous and exist
   - "scan_for_placeholders" # detect $1/$2/etc. and resolve before edits
   - "locate_targets" # find exact anchors (headers/lines) to edit
   - "backup_context" # keep before-snapshot for diff reporting
@@ -31,7 +31,7 @@ apply:
   - "append_changelog_bottom" # append new row at the bottom (chronological top→bottom)
 
 verify:
-  - "re_read_canvas" # re-open and verify expected text is present
+  - "reload_and_verify" # re-open target files and verify expected text is present
   - "exact_header_checks" # confirm headers match intended numbers/titles
   - "before_after_diff" # compute and report minimal diff
   - "lint_ascii_punctuation" # confirm ASCII-only punctuation where required
@@ -83,7 +83,7 @@ overrides:
       minimal_diffs: true
       require_exact_headers: true
     verify:
-      - "re_read_canvas"
+      - "reload_and_verify"
       - "before_after_diff"
       - "lint_ascii_punctuation"
       - "cross_links_exist"

@@ -17,7 +17,7 @@
   - **Config:** `.ai/workflows/config.yaml` (YAML/JSON/INI; **INI read-only**)
 - Agents MUST load **core** and then select the workflow by **file scope** (**config > docs > code**).
 
-**Applies to all agents:** Web GPT, Codex CLI, and any local/CI runners. All agents MUST load `.ai/policies/*` before proposing or applying edits and MUST follow the same safety rails and workflows.
+**Applies to all agents:** Codex CLI and any local/CI runners. All agents MUST load `.ai/policies/*` before proposing or applying edits and MUST follow the same safety rails and workflows.
 
 ## Permissions
 
@@ -46,7 +46,7 @@
 - **Code files:** follow `.ai/workflows/code.yaml` (staged-only format/lint/build/test).
 - **Docs:** follow `.ai/workflows/docs.yaml` (staged-only format/lint/link-check). Use repo-local Prettier via **`npx prettier`**.
 - **Config files:** follow `.ai/workflows/config.yaml` (staged-only format/lint/validate for YAML/JSON).
-  - **INI and .mdk.ini are enforced read-only** unless explicitly allowed by a pragma in the file-policy.
+  - **INI and .mdk.ini are enforced read-only**. There are no pragma-based overrides; edits to these files are always denied.
 - Do **not** run repo-wide format without explicit consent. Humans follow `docs/policy/Workflow.md`.
 
 ## Artifacts
@@ -86,12 +86,12 @@
 ## Edit Safety Protocol
 
 > Source of truth: `.ai/policies/safety.yaml` (CI-enforced). Summary only.
-> These rules apply equally to Web GPT, Codex CLI, and local/CI agents. Noncompliant edits are rejected in CI.
+> These rules apply to CLI and CI agents (Codex CLI, local runners). Noncompliant edits are rejected in CI.
 
-- **Only edit an opened canvas.** No background or deferred edits.
+- **Only edit explicitly targeted files.** No background or deferred edits.
 - **Preflight:** refresh cache; locate **exact** targets; if not found, **abort**.
 - **Apply:** make **minimal, atomic** diffs; renumber in a safe sequence; respect read-only (INI/`.mdk.ini`).
-- **Verify:** re-read canvas; check presence/absence/count; emit a **minimal diff**.
+- **Verify:** reload target files; check presence/absence/count; emit a **minimal diff**.
 - **Changelog:** ensure policy line; append new row **at the bottom**.
 - **On failure:** stop and report; do **not** guess or chain edits.
 

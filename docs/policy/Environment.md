@@ -10,13 +10,15 @@ This policy defines the supported development and build environment for the dev-
 - Linux distributions capable of running dotnet SDK 9.0.x and PowerShell 7.x. Mixed setups (e.g., Space Engineers installed on Windows but exposed to Linux via shared storage) are supported when the `Bin64` directory is reachable.
 - Additional platforms may be documented later; contributors should provide feedback through issues before deviating.
 
+> **CI note:** GitHub Actions runners do **not** include Space Engineers. SE-dependent operations (e.g., Bin64 discovery, game builds) are **not applicable in CI** and MUST be skipped.
+
 ## Required Toolchain
 
 - **dotnet SDK 9.0.x:** Provides Roslyn compiler and libraries required for MDK2 builds. Visual Studio is optional.
 - **PowerShell 7.x:** Required on Windows; optional on Linux unless the developer intends to run the PowerShell version of tooling.
 - **MDK2 templates (Mal.Mdk2.ScriptTemplates 2.2.31):** Installed via `dotnet new --install`.
 - **Space Engineers Bin64:** The `binarypath` used by builds. Developers must ensure the folder is accessible.
-- **Node.js + npm:** Required. Used by docs/config workflows (e.g., Prettier, markdownlint) and for optional Codex CLI. Tooling must detect existing installs before offering guided installation.
+- **Node.js + npm:** Required in `tooling` mode; optional in `se` mode (CI still runs docs/config checks). Used by docs/config workflows (e.g., Prettier, markdownlint) and for optional Codex CLI. Tooling must detect existing installs before offering guided installation.
 
 ## Installation Guidance
 
@@ -36,6 +38,8 @@ This policy defines the supported development and build environment for the dev-
 - **Strings:** Follow the Coding Style policy: ASCII punctuation by default; Unicode may be used for player-visible UI text with ASCII fallbacks.
 
 ## Workspace mode (SE vs tooling)
+
+**Execution-mode SoT:** The authoritative, machine-readable source for Local vs CI/GitHub behavior lives in **`.ai/policies/core.yaml` → `modes`**. This policy explains the concept and selection only; the definitive behavior matrix (installs, prompts, SE builds, linters/formatters, Bin64 discovery, Codex setup) is maintained in that YAML. Tools and workflows MUST read `${MODE}` from there.
 
 The dev-framework runs in one of two modes:
 
@@ -79,12 +83,12 @@ To change only your local machine without committing, create `.devfw-mode.local`
 
 ## Tooling Layers
 
-| Policy      | Spec                        | Tool                                                                    |
-| ----------- | --------------------------- | ----------------------------------------------------------------------- |
-| Environment | ToolingGeneral.md           | All tooling                                                             |
-| Environment | SetupTooling.md             | tools/Setup.ps1, tools/setup.sh                                         |
-| Environment | ScaffoldMdk2Project.md      | tools/ScaffoldMdk2Project.ps1, tools/scaffold-mdk2-project.sh           |
-| Environment | ScaffoldProjectSubmodule.md | tools/ScaffoldProjectSubmodule.ps1, tools/scaffold-project-submodule.sh |
+| Policy           | Spec                        | Tool                                                                    |
+| ---------------- | --------------------------- | ----------------------------------------------------------------------- |
+| Workflow/Tooling | ToolingGeneral.md           | All tooling                                                             |
+| Environment      | SetupTooling.md             | tools/Setup.ps1, tools/setup.sh                                         |
+| Environment      | ScaffoldMdk2Project.md      | tools/ScaffoldMdk2Project.ps1, tools/scaffold-mdk2-project.sh           |
+| Environment      | ScaffoldProjectSubmodule.md | tools/ScaffoldProjectSubmodule.ps1, tools/scaffold-project-submodule.sh |
 
 - **Setup tooling** (`tools/Setup.ps1`, `tools/setup.sh`): prepares the super-repo environment, installs required SDKs, and ensures the root `se-config.ini` / `se-config.local.ini` templates exist (no per-project seeding).
 - **MDK2 project scaffolding** (`tools/ScaffoldMdk2Project.ps1`, `tools/scaffold-mdk2-project.sh`): creates or updates standalone Programmable Block or mixin projects without touching git state.

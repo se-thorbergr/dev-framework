@@ -9,7 +9,7 @@
   "MD013": false, // line length
   "MD041": false, // first line should be a top-level heading (allow files with front matter or comments)
 
-  // Allow limited inline HTML that’s common in our docs
+  // Allow limited inline HTML that's common in our docs
   "MD033": { "allowed_elements": ["br", "img", "a", "details", "summary"] },
 
   // Code blocks and lists

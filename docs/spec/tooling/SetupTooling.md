@@ -2,7 +2,7 @@
 
 # Setup Tooling Specification
 
-_Last updated: 2025-09-26 - Owner: geho_
+_Last updated: 2025-09-30 - Owner: geho_
 
 ## 1. Scope
 
@@ -13,10 +13,15 @@ _Last updated: 2025-09-26 - Owner: geho_
 - Verify and assist with installation of core dependencies: PowerShell 7.x, dotnet SDK 9.0.x (Roslyn included), MDK2 templates 2.2.31, and (optionally) Codex tooling when the developer opts in.
 - Offer guidance for installing Node.js and npm when Codex setup is requested, presenting manual/self-managed installation before automated options.
 - Ensure the super-repo configuration templates (`se-config.ini`, `se-config.local.ini`) exist and ensure solution scaffolding exists (`.sln`).
+- **Execution modes:**
+  - **Local:** full setup flow is permitted (prompts/installers allowed under flags); SE builds occur **only locally**.
+  - **CI/GitHub:** non-interactive checks only — **no prompts, no installs, no persistence, no SE builds**; emit annotations and summary.
 - **Out of scope:** provisioning CI infrastructure, remote repository automation, or enforcing per-submodule workflow (delegated to other tooling).
 
 ## 1.1 References
 
+- Spec Authoring Policy: `docs/policy/SpecAuthoring.md`
+- Spec Template (SoT): `docs/spec/tooling/_template.md` (Last updated: 2025-09-28)
 - Environment Policy: `docs/policy/Environment.md`
 - Workflow Policy: `docs/policy/Workflow.md`
 - Coding Style Policy: `docs/policy/CodingStyle.md`
@@ -46,7 +51,7 @@ _Last updated: 2025-09-26 - Owner: geho_
 
 See `ToolingGeneral.md` for mandatory shared options. This tool documents only its additional flags below.
 
-All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change.
+All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change, and `--debug` is a shorthand for `--verbose debug`.
 
 | Purpose              | PowerShell           | Bash                   | Notes                                                         |
 | -------------------- | -------------------- | ---------------------- | ------------------------------------------------------------- |
@@ -64,6 +69,19 @@ All other shared switches (dry-run, verbosity, help, summary, CI) are inherited 
 **Exit codes:** `0` = success; `1` = validation failure or unmet prerequisites; `2` = unexpected error; `3` = user-aborted (optional).
 
 ## 5. Workflow
+
+> **Execution-mode SoT:** Local vs CI/GitHub behavior is authoritative in `.ai/policies/core.yaml` → `modes`. This spec mirrors the summary only.
+
+**Local vs CI/GitHub behavior matrix**
+
+| Area               | Local (dev)                                      | CI/GitHub Actions                                                 |
+| ------------------ | ------------------------------------------------ | ----------------------------------------------------------------- |
+| Installs           | Allowed via `--auto-install` or prompts          | **Forbidden**                                                     |
+| Prompts            | Allowed                                          | **None** (non-interactive)                                        |
+| SE build           | Allowed (local-only)                             | **Forbidden**                                                     |
+| Linters/formatters | Optional                                         | **Required**                                                      |
+| Bin64 persistence  | May persist to `se-config.local.ini` (diff-only) | **Not applicable** (SE not present on CI runners); skip discovery |
+| Codex setup        | Optional (`--setup-codex` / `--skip-codex`)      | **Not used**                                                      |
 
 1. Parse CLI arguments, resolve forcing switches (`--notes-only`, `--auto-install`, `--setup-codex`, `--skip-codex`), and load configuration sources (default then local overrides).
 2. Determine the effective `binarypath`:
@@ -114,7 +132,11 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - The tool **MUST NOT** write to read-only config types (e.g., `*.mdk.ini`).
 - The tool **MUST** persist only keys that differ from the effective merged configuration.
 - The tool **SHOULD** support cross-OS setups where `Bin64` resides on the other OS.
+- In `--ci` mode, the tool **MUST NOT** prompt, **MUST NOT** attempt installs, and **MUST NOT** persist any changes.
+- In `--ci` mode, the tool **MUST** emit CI-friendly annotations and **MUST** exit non-zero when mandatory prerequisites are missing; otherwise exit 0.
+- In `--ci` mode, Codex setup **MUST NOT** run.
 - CI **MUST NOT** build SE solutions; CI runs format/lint only. Build is local-only.
+- The tool **MUST** support `--debug` as an alias for `--verbose debug`.
 
 ## 8. Outputs
 
@@ -134,8 +156,6 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 ## 10. Validation
 
-- Print resolved `${MODE}` and its source (precedence: `.devfw-mode.local` → `DEVFW_MODE` → `.devfw-mode` → heuristic), then continue checks below.
-
 - Print effective configuration sources and the merged result (template + local).
 - Verify `binarypath` exists and contains Space Engineers `Bin64` binaries.
 - Verify required runtimes: `pwsh` 7.x, `dotnet` 9.0.x; show versions detected.
@@ -144,6 +164,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - Confirm `se-config.ini` and `se-config.local.ini` exist with expected sections.
 - Ensure no writes were attempted to read-only types (`*.mdk.ini`).
 - On `--notes-only`, assert no side effects occurred; commands are printed, not executed.
+- In `--ci`, **skip Bin64 discovery** entirely; set summary `detected.binarypath = null` with reason "not applicable in CI" and **do not fail** due to missing SE.
 
 ## 11. Acceptance Criteria
 
@@ -152,6 +173,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - Security warnings are logged when manual installs are chosen.
 - Codex CLI is available when requested.
 - Exit code reflects the final state.
+- In `--ci`, success **does not require** a resolved `binarypath`; acceptance is based on config shape and prerequisite checks.
 
 ## 12. Security & Permissions
 
@@ -171,19 +193,25 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 > **Policy:** On every spec edit, append a new row **at the bottom** with date, summary, and approver (chronological top→bottom).
 
-| Date       | Change                                                                                                       | Approved By |
-| ---------- | ------------------------------------------------------------------------------------------------------------ | ----------- |
-| 2025-09-19 | Initial draft specification                                                                                  | geho        |
-| 2025-09-19 | Documented interactive/automatic install behavior                                                            | geho        |
-| 2025-09-19 | Added `--notes-only` flag and guidance expectations                                                          | geho        |
-| 2025-09-19 | Clarified platform/path handling, solution override, and Codex opt-in                                        | geho        |
-| 2025-09-19 | Documented package-manager preference and manual install warnings                                            | geho        |
-| 2025-09-19 | Prioritized binarypath resolution before helper path discovery                                               | geho        |
-| 2025-09-19 | Linked behavior back to Environment Policy                                                                   | geho        |
-| 2025-09-19 | Clarified PB-script-specific handling of ProjectName.mdk\*.ini and mixin exclusions                          | geho        |
-| 2025-09-20 | Documented winget/MSI and apt install flows plus Codex npm bootstrap with Node guidance                      | geho        |
-| 2025-09-20 | Clarified se-config template handling scope (root-only) and removed per-project writes                       | geho        |
-| 2025-09-20 | Referenced ToolingGeneral shared CLI contract                                                                | geho        |
-| 2025-09-20 | Documented ProjectName/ProjectFolder terminology                                                             | geho        |
-| 2025-09-20 | Clarified minimal local config overlay, duplicate-value warnings, and validation order                       | geho        |
-| 2025-09-26 | Align to template: added sections, renumbered headings, normalized MDK2 naming; added changelog policy note. | geho        |
+| Date       | Change                                                                                                                      | Approved By |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| 2025-09-19 | Initial draft specification                                                                                                 | geho        |
+| 2025-09-19 | Documented interactive/automatic install behavior                                                                           | geho        |
+| 2025-09-19 | Added `--notes-only` flag and guidance expectations                                                                         | geho        |
+| 2025-09-19 | Clarified platform/path handling, solution override, and Codex opt-in                                                       | geho        |
+| 2025-09-19 | Documented package-manager preference and manual install warnings                                                           | geho        |
+| 2025-09-19 | Prioritized binarypath resolution before helper path discovery                                                              | geho        |
+| 2025-09-19 | Linked behavior back to Environment Policy                                                                                  | geho        |
+| 2025-09-19 | Clarified PB-script-specific handling of ProjectName.mdk\*.ini and mixin exclusions                                         | geho        |
+| 2025-09-20 | Documented winget/MSI and apt install flows plus Codex npm bootstrap with Node guidance                                     | geho        |
+| 2025-09-20 | Clarified se-config template handling scope (root-only) and removed per-project writes                                      | geho        |
+| 2025-09-20 | Referenced ToolingGeneral shared CLI contract                                                                               | geho        |
+| 2025-09-20 | Documented ProjectName/ProjectFolder terminology                                                                            | geho        |
+| 2025-09-20 | Clarified minimal local config overlay, duplicate-value warnings, and validation order                                      | geho        |
+| 2025-09-26 | Align to template: added sections, renumbered headings, normalized MDK2 naming; added changelog policy note.                | geho        |
+| 2025-09-28 | Added Spec Template (SoT) reference to Section 1.1; aligned with Spec Authoring Policy; no behavioral changes.              | geho        |
+| 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                       | geho        |
+| 2025-09-28 | Removed `${MODE}` echo from Section 10 Validation (orthogonal to Setup Tooling); no behavioral changes.                     | geho        |
+| 2025-09-28 | Standardized verbosity: added `--debug` alias note in Sections 4 and 7.                                                     | geho        |
+| 2025-09-30 | Clarify Local vs CI split: scope note, workflow matrix, and CI guardrails in Section 7; no behavioral change to local flow. | geho        |
+| 2025-09-30 | Added SoT pointer in Section 5 to `.ai/policies/core.yaml → modes`.                                                         | geho        |

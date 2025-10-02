@@ -2,6 +2,7 @@
 # - Purpose: consistent PowerShell lint rules across local runs and CI.
 # - Scope: repository PowerShell scripts/modules; excludes tests and generated code.
 # - Tone: neutral, minimal comments; see docs/policy/CodingStyle.md for rationale.
+# - Encoding: UTF-8 (no BOM) per CodingStyle; PSScriptAnalyzer BOM rule intentionally not enforced.
 @{
   # Prefer explicit tweaks over blanket disables. Keep disables minimal and documented.
 
@@ -16,7 +17,6 @@
     'PSUseConsistentWhitespace',
     'PSUseDeclaredVarsMoreThanAssignments',
     'PSAvoidUsingInvokeExpression',
-    'PSUseBOMForUnicodeEncodedFile',
     'PSAvoidUsingPlainTextForPassword'
   )
 

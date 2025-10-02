@@ -2,7 +2,7 @@
 
 # Scaffold Project Submodule Specification
 
-_Last updated: 2025-09-27 - Owner: geho_
+_Last updated: 2025-09-28 - Owner: geho_
 
 ## 1. Scope
 
@@ -12,6 +12,8 @@ _Last updated: 2025-09-27 - Owner: geho_
 
 ## 1.1 References
 
+- Spec Authoring Policy: `docs/policy/SpecAuthoring.md`
+- Spec Template (SoT): `docs/spec/tooling/_template.md` (Last updated: 2025-09-28)
 - Environment Policy: `docs/policy/Environment.md`
 - Workflow Policy: `docs/policy/Workflow.md`
 - Coding Style Policy: `docs/policy/CodingStyle.md`
@@ -36,7 +38,7 @@ _Last updated: 2025-09-27 - Owner: geho_
 
 See `ToolingGeneral.md` for mandatory shared options. This tool documents only its additional flags below.
 
-All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change.
+All other shared switches (dry-run, verbosity, help, summary, CI) are inherited without change, and `--debug` is a shorthand for `--verbose debug`.
 
 | Purpose             | PowerShell               | Bash                       | Notes                                                   |
 | ------------------- | ------------------------ | -------------------------- | ------------------------------------------------------- |
@@ -94,6 +96,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - The tool **MUST** seed only keys that differ from the effective configuration into `.mdk.local.ini` (diff-only writes) and add a generated header.
 - The tool **MUST** refuse destructive operations on existing non-empty targets unless a future `--force` is explicitly provided.
 - CI **MUST NOT** build SE solutions; CI runs format/lint only. Initial build is **local-only**.
+- The tool **MUST** support `--debug` as an alias for `--verbose debug`.
 
 ## 8. Outputs
 
@@ -112,7 +115,6 @@ Use RFC 2119 terms. Keep each requirement atomic.
 ## 10. Validation
 
 - Print tool version(s) via `--version` (or equivalent) in logs.
-- Print resolved `${MODE}` and its source (precedence: `.devfw-mode.local` → `DEVFW_MODE` → `.devfw-mode` → heuristic).
 - Verify git prerequisites: `git` available; working tree clean or warn when staging will occur.
 - Verify target path resolves to `source/<type>/<ProjectFolder>` (or overridden by `--output`); path does not already contain a conflicting submodule.
 - If `--repo` provided: confirm remote is reachable and `git submodule add` would succeed (dry-run prints commands only).
@@ -162,3 +164,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-19 | Added pass-through project options, existing-project detection, shared config seeding, and remote-creation limitations                                                                                      | geho        |
 | 2025-09-20 | Referenced ToolingGeneral shared CLI contract                                                                                                                                                               | geho        |
 | 2025-09-27 | Aligned to template: added References & Preconditions; Normative Requirements; split Validation/Acceptance; Security & Telemetry; inherited flags from project scaffolder; exit codes; section renumbering. | geho        |
+| 2025-09-28 | Added Spec Template (SoT) reference to Section 1.1; aligned with Spec Authoring Policy; no behavioral changes.                                                                                              | geho        |
+| 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                                                                                       | geho        |
+| 2025-09-28 | Removed `${MODE}` echo from Section 10 Validation (orthogonal to scaffolding); retained git/dotnet and template checks.                                                                                     | geho        |
+| 2025-09-28 | Standardized verbosity: added `--debug` alias note in Sections 4 and 7.                                                                                                                                     | geho        |
