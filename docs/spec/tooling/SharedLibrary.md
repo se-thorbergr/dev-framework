@@ -70,7 +70,7 @@ Last updated: 2025-10-02 - Owner: geho
 2. Call `Initialize-Cli` / `initialize_cli` with argv and tool-specific option definitions.
 3. Use `Write-Log` / `write_log` for output; the logger returned from init handles levels and ASCII-only formatting.
 4. Execute tool logic, calling `Write-Log` and `Add-SummaryItem` / `add_summary_item` for major steps.
-5. On exit, call `Emit-Summary` / `emit_summary` if the summary flag is present, passing exit code and any captured errors. Accept `--summary-format json` and `--summary-json <path>` to opt into structured outputs while preserving plain-text defaults.
+5. On exit, call `Emit-Summary` / `emit_summary` if the summary flag is present, passing exit code and any captured errors. Honor `--summary-format` (default `text`) and `--summary-json <path>` when provided, while preserving plain-text defaults.
 6. Before persisting staged outputs, request `Normalize-TextFile` / `normalize_text_file` to enforce UTF-8 + LF + terminal newline rules on any buffers the tool prepares for policy-managed files.
 7. When interactive progress feedback is needed, call `Start-Spinner` / `start_spinner` and `Stop-Spinner` / `stop_spinner`; these helpers MUST no-op automatically in CI mode or non-TTY contexts.
 
@@ -100,7 +100,7 @@ Last updated: 2025-10-02 - Owner: geho
 - All log lines must be prefixed with level tags (`[info]`, `[debug]`, etc.)
   and respect `--ci` formatting rules.
 - Spinner frames MUST remain ASCII-only, avoid overwriting durable log output, and stop cleanly when errors occur.
-- JSON summaries MUST emit to STDOUT (default) or the path passed to `--summary-json`; the file write remains the caller’s responsibility.
+- JSON summaries MUST emit to STDOUT (default) or the path passed to `--summary-json`; callers persist the file after receiving the buffer.
 
 ## 9. Failure Modes & Recovery
 

@@ -70,14 +70,16 @@ Last updated: 2025-09-28 - Owner: geho
 
 The parser MUST recognize and normalize these flags (forwarding unknown tool-specific args to callers):
 
-| Flag                    | Semantics                                                                 |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `--help`                | Produce stable, parseable help text via `Emit-Help`/`help_emit`.          |
-| `--version`             | Produce stable, parseable version text via `Emit-Version`/`version_emit`. |
-| `--dry-run`             | Force **no side effects** mode; libraries MUST honor.                     |
-| `--summary`             | Collect and print a summary at end via `Emit-Summary`/`summary_emit`.     |
-| `--verbose` / `--debug` | Increase log verbosity (info→debug).                                      |
-| `--ci`                  | Force CI formatting regardless of env autodetect.                         |
+| Flag                    | Semantics                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `--help`                | Produce stable, parseable help text via `Emit-Help`/`help_emit`.                                              |
+| `--version`             | Produce stable, parseable version text via `Emit-Version`/`version_emit` (includes `api_version`).            |
+| `--dry-run`             | Force **no side effects** mode; libraries MUST honor.                                                         |
+| `--summary`             | Collect and emit a summary at end via `Emit-Summary`/`summary_emit`.                                          |
+| `--summary-format`      | Optional summary format selector (`text` default, `json` for schema v1 output). Requires `--summary`.         |
+| `--summary-json <path>` | Write schema v1 JSON summary to caller-provided path; combine with `--summary` (`--summary-format` optional). |
+| `--verbose` / `--debug` | Increase log verbosity (info→debug).                                                                          |
+| `--ci`                  | Force CI formatting regardless of env autodetect.                                                             |
 
 **Alias rule:** `--debug` **MUST** be treated as a shorthand for `--verbose debug` in both shells.
 
