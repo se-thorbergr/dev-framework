@@ -26,5 +26,5 @@
   "MD009": { "strict": false }, // trailing spaces: keep relaxed
   "MD012": { "maximum": 2 }, // consecutive blank lines
   "MD025": { "front_matter_title": "" }, // don’t enforce title in front matter
-  "MD026": { "punctuation": ".,;:!?" }, // allowed punctuation for heading trailing punctuation
+  "MD026": { "punctuation": ".,;:!?" } // allowed punctuation for heading trailing punctuation
 }
