@@ -35,14 +35,6 @@ The MDK2 Programmable Block Scripts and Mixins are not directly contained in thi
 
 The development framework manages submodules, build, and CI, and enforces policy alignment.
 
-## Tooling Helpers
-
-- Run `pwsh tools/format-staged.ps1 --dry-run` (or `bash tools/format-staged.sh --dry-run`) to preview formatter changes for staged C#, PowerShell, Bash, and Markdown files.
-- Run `pwsh tools/lint-staged.ps1 --dry-run` to check staged files with ScriptAnalyzer, ShellCheck, markdownlint, and optional `dotnet build`.
-- Use `pwsh tools/format.ps1 --files path/to/file.md` (or `bash tools/format.sh`) when you want to format specific files before staging them.
-- Use `pwsh tools/lint.ps1 --files path/to/file.md --fail-on-warn` to lint explicit files while you iterate.
-- Prefer the npm shortcuts: `npm run format -- <files>`, `npm run lint -- <files>`, or their `*:staged` variants route through the same helpers; Markdown is formatted with Prettier and Mermaid diagrams can be validated with `@mermaid-js/mermaid-cli` when installed.
-
 ## Important Note
 
 This is a **hobby project**. That means I only work on it in my **_limited_ spare time**. So don't expect fast delivery of bugfixes and features.

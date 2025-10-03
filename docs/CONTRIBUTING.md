@@ -14,6 +14,14 @@ Thank you for supporting the dev-framework project. This guide summarizes expect
 - Run the setup script (`tools/Setup.ps1` or `tools/setup.sh`) to seed configuration files prior to scaffolding projects.
 - Record any deviations or discovered gaps in the _Open Questions_ section of the appropriate spec.
 
+### Tooling Helpers
+
+- Preview formatter changes for staged files with `pwsh tools/format-staged.ps1 --dry-run` (or `bash tools/format-staged.sh --dry-run`).
+- Lint staged files via `pwsh tools/lint-staged.ps1 --dry-run`; this runs ScriptAnalyzer, ShellCheck, markdownlint, and optional `dotnet build` checks.
+- Format specific files before staging using `pwsh tools/format.ps1 --files path/to/file.md` (or `bash tools/format.sh`).
+- Lint explicit files with `pwsh tools/lint.ps1 --files path/to/file.md --fail-on-warn` while iterating locally.
+- Prefer npm shortcuts (`npm run format -- <files>`, `npm run lint -- <files>`, and their `*:staged` variants) for parity with CI; Markdown formatting relies on Prettier, and Mermaid diagrams are validated with `@mermaid-js/mermaid-cli` when available.
+
 ## Making Changes
 
 1. Align your plan with the maintainer/AI workflow (share context, agree on scope, follow incremental updates).
