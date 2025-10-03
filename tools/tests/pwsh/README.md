@@ -15,7 +15,7 @@ This folder contains **Pester** tests for dev‑framework scripts and modules.
 
 ```pwsh
 # From repo root
-Invoke-Pester tools/tests/pwsh -CI
+pwsh -NoLogo -NoProfile -Command "Invoke-Pester tools/tests/pwsh -CI"
 ```
 
 - `-CI` enables CI‑friendly output and exit codes.
