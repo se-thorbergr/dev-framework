@@ -39,27 +39,27 @@ Last updated: 2025-09-28 - Owner: geho
 
 ### 4.1 PowerShell (tools/lib/fs.ps1)
 
-| Function               | Parameters                                                                  | Returns                                                             | Notes                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `Normalize-Path`       | `-Path string`                                                              | string                                                              | Resolves separators/case per OS; no FS access required.                   |
-| `Plan-EnsureDirectory` | `-Path string`                                                              | object `{ Actions:[{Op:'mkdir',Path}], Conflicts:[] }`              | If dir missing, adds a `mkdir` action; otherwise empty.                   |
-| `Plan-EnsureFile`      | `-Path string -Content string -Mode ('create'\| 'overwrite'\|'if-changed')` | object `{ Actions:[{Op:'write',Path,Content}], Diff:{Old?,New?} }`  | Computes write action; with `if-changed` emits only when content differs. |
-| `Plan-Copy`            | `-Source string -Target string -Overwrite:bool`                             | object `{ Actions:[{Op:'copy',Src,Dest,Overwrite}], Conflicts:[] }` | Plans a non-destructive copy; flags potential overwrites.                 |
-| `Plan-Move`            | `-Source string -Target string -Overwrite:bool`                             | object `{ Actions:[{Op:'move',Src,Dest,Overwrite}], Conflicts:[] }` | Plans a move; callers decide execution.                                   |
-| `Validate-Plan`        | `-Actions object[]`                                                         | object `{ IsValid:bool; Errors:[…]; Warnings:[…] }`                 | Checks for contradictory or unsafe ops (e.g., write to protected path).   |
-| `Render-Plan`          | `-Actions object[] -Header string?`                                         | string                                                              | ASCII-only, human-readable summary (for `--summary`).                     |
+| Function               | Parameters                                                                  | Returns                                                                                                                              | Notes                                                                                                        |
+| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `Normalize-Path`       | `-Path string`                                                              | string                                                                                                                               | Resolves separators/case per OS; no FS access required.                                                      |
+| `Plan-EnsureDirectory` | `-Path string`                                                              | object `{ Actions:[{Op:'mkdir',Path}], Conflicts:[] }`                                                                               | If dir missing, adds a `mkdir` action; otherwise empty.                                                      |
+| `Plan-EnsureFile`      | `-Path string -Content string -Mode ('create'\| 'overwrite'\|'if-changed')` | object `{ Actions:[{Op:'write',Path,Content,Hash,HashAlgorithm}], Diff:{OldContent?,NewContent?,OldHash?,NewHash?,HashAlgorithm?} }` | Computes write action; with `if-changed` emits only when content differs and surfaces SHA-256 hash metadata. |
+| `Plan-Copy`            | `-Source string -Target string -Overwrite:bool`                             | object `{ Actions:[{Op:'copy',Src,Dest,Overwrite}], Conflicts:[] }`                                                                  | Plans a non-destructive copy; flags potential overwrites.                                                    |
+| `Plan-Move`            | `-Source string -Target string -Overwrite:bool`                             | object `{ Actions:[{Op:'move',Src,Dest,Overwrite}], Conflicts:[] }`                                                                  | Plans a move; callers decide execution.                                                                      |
+| `Validate-Plan`        | `-Actions object[]`                                                         | object `{ IsValid:bool; Errors:[…]; Warnings:[…] }`                                                                                  | Checks for contradictory or unsafe ops (e.g., write to protected path).                                      |
+| `Render-Plan`          | `-Actions object[] -Header string?`                                         | string                                                                                                                               | ASCII-only, human-readable summary (for `--summary`).                                                        |
 
 ### 4.2 Bash (tools/lib/fs.sh)
 
-| Function              | Parameters           | Returns                              | Notes                                    |
-| --------------------- | -------------------- | ------------------------------------ | ---------------------------------------- |
-| `fs_normalize`        | `path`               | string                               | Normalize separators/case as applicable. |
-| `fs_plan_ensure_dir`  | `path`               | map `{actions[],conflicts[]}`        | Adds mkdir action if missing.            |
-| `fs_plan_ensure_file` | `path,content,mode`  | map `{actions[],diff{old?,new?}}`    | Only plans writes; `mode` like above.    |
-| `fs_plan_copy`        | `src,dest,overwrite` | map `{actions[],conflicts[]}`        | Plan copy with overwrite flag.           |
-| `fs_plan_move`        | `src,dest,overwrite` | map `{actions[],conflicts[]}`        | Plan move with overwrite flag.           |
-| `fs_plan_validate`    | `actions[]`          | map `{is_valid,errors[],warnings[]}` | Validate plan against policy.            |
-| `fs_plan_render`      | `actions[],header?`  | string                               | Human-readable, ASCII-only.              |
+| Function              | Parameters           | Returns                                                                          | Notes                                                               |
+| --------------------- | -------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `fs_normalize`        | `path`               | string                                                                           | Normalize separators/case as applicable.                            |
+| `fs_plan_ensure_dir`  | `path`               | map `{actions[],conflicts[]}`                                                    | Adds mkdir action if missing.                                       |
+| `fs_plan_ensure_file` | `path,content,mode`  | map `{actions[],diff{oldContent?,newContent?,oldHash?,newHash?,hashAlgorithm?}}` | Only plans writes; `mode` like above and includes SHA-256 metadata. |
+| `fs_plan_copy`        | `src,dest,overwrite` | map `{actions[],conflicts[]}`                                                    | Plan copy with overwrite flag.                                      |
+| `fs_plan_move`        | `src,dest,overwrite` | map `{actions[],conflicts[]}`                                                    | Plan move with overwrite flag.                                      |
+| `fs_plan_validate`    | `actions[]`          | map `{is_valid,errors[],warnings[]}`                                             | Validate plan against policy.                                       |
+| `fs_plan_render`      | `actions[],header?`  | string                                                                           | Human-readable, ASCII-only.                                         |
 
 ### 4.3 Policy guards (normative)
 
@@ -133,9 +133,9 @@ Optional columns: **Exit Code** and **Area** (e.g., `git`, `dotnet`, `fs`) to sp
 
 ## 14. Open Questions / Future Enhancements
 
-- Should LibFs eventually expose an **Apply-Plan** helper (opt-in) to execute actions, guarded by policy?
-- Add delete operations behind explicit `allow_delete` policy with double-confirm + dry-run staging?
-- Provide binary-safe hashing to power `if-changed` decisions for large files?
+- **Apply-plan execution helper:** Expose an opt-in `Apply-Plan` entry point so callers can execute planned actions when they explicitly opt in. The helper MUST enforce policy guards (dry-run preview, confirmation hooks, respect read-only globs) and remain optional so existing tooling can keep ownership of side effects.
+- **Delete operations:** Deletions remain out of scope. If demand emerges, define an `allow_delete` flag with staged dry-run + double-confirm semantics before adding `remove` actions to the library.
+- **Binary-safe diffing:** Implement lightweight hashing (SHA-256) for `if-changed` decisions so large/binary files can be compared without loading entire contents into memory. Expose results via plan metadata (`Hash`, `HashAlgorithm`, `OldHash`, `NewHash`) so callers can audit behavior, and document performance trade-offs.
 
 ## 15. Change Log
 
