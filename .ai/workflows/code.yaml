@@ -7,35 +7,9 @@ golden_order:
   - sync_branch:
       when: "ask_first('branch creation/checkout')"
       command: "git fetch --all --prune && git checkout -b <feature/xyz>"
-  - format_staged:
-      csharp: "dotnet format --no-restore --include $(git diff --cached --name-only -- '*.cs')"
-      pwsh: >
-        pwsh -NoLogo -NoProfile -Command "
-          $settings = 'tools/pssa/PSScriptAnalyzerSettings.psd1';
-          $files = @(git diff --cached --name-only -- '*.ps1' '*.psm1' '*.psd1');
-          if ($files.Count -gt 0) {
-            foreach ($file in $files) {
-              $formatted = Invoke-Formatter -ScriptDefinition (Get-Content -Raw -Path $file) -Settings $settings;
-              Set-Content -Path $file -Value $formatted
-            }
-          }
-        "
-      bash: >
-        git diff --cached --name-only -- '*.sh' | xargs -r shfmt -ln bash -i 2 -ci -bn -sr -w
+  - format_staged: "pwsh tools/format-staged.ps1"
   - lint_verify:
-      pwsh_fix_then_verify: >
-        pwsh -NoLogo -NoProfile -Command "
-          $settings = 'tools/pssa/PSScriptAnalyzerSettings.psd1';
-          $files = @(git diff --cached --name-only -- '*.ps1' '*.psm1' '*.psd1');
-          if ($files.Count -gt 0) {
-            foreach ($file in $files) {
-              Invoke-ScriptAnalyzer -Path $file -Settings $settings
-            }
-          }
-        "
-      bash_shellcheck_staged: >
-        flags="$(grep -v '^[[:space:]]*#' tools/shell/shellcheckrc | xargs)";
-        git diff --cached --name-only -- '*.sh' | xargs -r shellcheck $flags
+      helpers: "pwsh tools/lint-staged.ps1 --fail-on-warn"
       csharp_build_warnaserror: true
   - build: "dotnet build -warnaserror" # CI skips this; see ci_minimal_info_only
   - tests:
@@ -51,9 +25,15 @@ golden_order:
       trailer: "[ai-edit]"
   - ci_check_modes: true
   - ci_minimal_info_only:
-      format_check: "dotnet format --verify-no-changes || true"
-      pwsh_lint: 'pwsh -NoProfile -Command "Invoke-ScriptAnalyzer -Path (Get-ChildItem -Recurse -Include *.ps1,*.psm1,*.psd1 | ForEach-Object FullName) -Settings tools/pssa/PSScriptAnalyzerSettings.psd1; exit 0"'
-      bash_lint: 'files="$(git ls-files ''*.sh'')"; if [ -n "$files" ]; then shellcheck $(grep -v ''^[[:space:]]*#'' tools/shell/shellcheckrc | xargs) $files || true; else echo ''No *.sh files to lint''; fi'
+      format_check: "pwsh tools/format.ps1 --dry-run || true"
+      pwsh_lint: "pwsh tools/lint.ps1 --dry-run --fail-on-warn || true"
+      bash_lint: |
+        mapfile -t files < <(git ls-files '*.sh')
+        if [ ${#files[@]} -gt 0 ]; then
+          pwsh tools/lint.ps1 --dry-run --files "${files[@]}" --fail-on-warn || true
+        else
+          echo 'No *.sh files to lint'
+        fi
 notes:
   - "Reads ${MODE} from core.yaml; in SE mode, local code tools may be skipped; CI enforces."
   - "In CI (e.g., GitHub), SE solutions are not built; build is local-only. CI runs format/lint only."

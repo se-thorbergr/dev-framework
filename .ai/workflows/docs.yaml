@@ -14,14 +14,18 @@ golden_order:
   - select_files: "staged within docs scope (*.md, *.markdown)"
   - format:
       when: "${MODE} != se"
-      markdown: >
-        git diff --cached --name-only -- '*.md' '*.markdown' \
-          | xargs -r npx prettier --write
+      markdown: |
+        mapfile -t files < <(git diff --cached --name-only -- '*.md' '*.markdown')
+        if [ ${#files[@]} -gt 0 ]; then
+          pwsh tools/format.ps1 --files "${files[@]}"
+        fi
   - lint:
       when: "${MODE} != se"
-      markdown: >
-        git diff --cached --name-only -- '*.md' '*.markdown' \
-          | xargs -r npx markdownlint -c .markdownlint.jsonc
+      markdown: |
+        mapfile -t files < <(git diff --cached --name-only -- '*.md' '*.markdown')
+        if [ ${#files[@]} -gt 0 ]; then
+          pwsh tools/lint.ps1 --files "${files[@]}" --fail-on-warn
+        fi
   - link_check:
       when: "${MODE} == tooling"
       markdown: >
