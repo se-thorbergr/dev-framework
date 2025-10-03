@@ -22,7 +22,7 @@
 
   # Rule configurations aligned with CodingStyle (2-space indent, brace/spacing hygiene)
   Rules = @{
-    PSUseConsistentIndentation = @{ Enable = $true; IndentationSize = 2; PipelineIndentation = 'Increase' }
+    PSUseConsistentIndentation = @{ Enable = $true; IndentationSize = 4; PipelineIndentation = 'Increase' }
     PSUseConsistentWhitespace  = @{ Enable = $true; CheckOpenBrace = $true; CheckInnerBrace = $true; CheckOpenParen = $true; CheckSeparator = $true; CheckPipe = $true }
     PSPlaceOpenBrace           = @{ Enable = $true; OnSameLine = $true }
     PSAlignAssignmentStatement = @{ Enable = $true }
@@ -34,3 +34,4 @@
     '**/generated/**'
   )
 }
+
