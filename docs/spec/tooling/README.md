@@ -42,6 +42,11 @@ This index lists all **tooling specifications** and how they relate. Use it to n
 - **Scaffold Project Submodule** - `docs/spec/tooling/ScaffoldProjectSubmodule.md`
 - **Tooling General Notes** - `docs/spec/tooling/ToolingGeneral.md` _(contract; see Section 1)_
 
+### Formatter & Linter Helpers
+
+- Specs: `docs/spec/tooling/FormatHelpers.md`, `docs/spec/tooling/LintHelpers.md`
+- Entrypoints: `tools/format*.ps1|sh`, `tools/lint*.ps1|sh`
+
 > For **Local vs CI/GitHub** execution behavior, see the matrices in `ToolingGeneral.md` Section 5 and `SetupTooling.md` Section 5. Authoritative SoT: `.ai/policies/core.yaml` → `modes`.
 >
 > New tools MUST follow the CLI contract and SHOULD reuse domain libraries above.
