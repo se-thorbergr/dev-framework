@@ -105,9 +105,11 @@ log() {
   shift
   local message="$*"
   local current="${CLI_FLAGS[log_level]}"
-  local level_rank=$(_cli_log_rank "$level")
-  local current_rank=$(_cli_log_rank "$current")
-  if (( level_rank <= current_rank )); then
+  local level_rank
+  level_rank=$(_cli_log_rank "$level")
+  local current_rank
+  current_rank=$(_cli_log_rank "$current")
+  if ((level_rank <= current_rank)); then
     printf '[%s] %s\n' "$level" "$message"
   fi
 }
@@ -125,15 +127,18 @@ summary_emit() {
 
   if [[ "$format" == "json" || -n "$output_path" ]]; then
     local items_json="[]"
-    if (( ${#CLI_SUMMARY_ITEMS[@]} > 0 )); then
+    if ((${#CLI_SUMMARY_ITEMS[@]} > 0)); then
       local buffer=""
       for entry in "${CLI_SUMMARY_ITEMS[@]}"; do
-        IFS="$CLI_SEP" read -r kind message data <<<"$entry"
-        local escaped_kind="$(_cli_escape_json_string "$kind")"
-        local escaped_message="$(_cli_escape_json_string "$message")"
+        IFS="$CLI_SEP" read -r kind message data <<< "$entry"
+        local escaped_kind
+        escaped_kind=$(_cli_escape_json_string "$kind")
+        local escaped_message
+        escaped_message=$(_cli_escape_json_string "$message")
         local item_data='null'
         if [[ -n "$data" ]]; then
-          local escaped_data="$(_cli_escape_json_string "$data")"
+          local escaped_data
+          escaped_data=$(_cli_escape_json_string "$data")
           item_data="\"${escaped_data}\""
         fi
         buffer+="{\"kind\":\"${escaped_kind}\",\"message\":\"${escaped_message}\",\"data\":${item_data}},"
@@ -142,7 +147,12 @@ summary_emit() {
       items_json="[${buffer}]"
     fi
 
-    local ci_enabled=$([[ "${CLI_FLAGS[ci]}" == "1" ]] && echo true || echo false)
+    local ci_enabled
+    if [[ "${CLI_FLAGS[ci]}" == "1" ]]; then
+      ci_enabled=true
+    else
+      ci_enabled=false
+    fi
     local ci_provider="null"
     if [[ "$GITHUB_ACTIONS" == 'true' ]]; then
       ci_provider='"github_actions"'
@@ -160,7 +170,7 @@ summary_emit() {
 
   printf 'Summary:\n'
   for entry in "${CLI_SUMMARY_ITEMS[@]}"; do
-    IFS="$CLI_SEP" read -r kind message _ <<<"$entry"
+    IFS="$CLI_SEP" read -r kind message _ <<< "$entry"
     printf -- '- [%s] %s\n' "$kind" "$message"
   done
 }
@@ -201,10 +211,13 @@ error_make() {
   local code="$1"
   local message="$2"
   local area="$3"
-  local escaped_message="$(_cli_escape_json_string "$message")"
+  local escaped_message
+  escaped_message=$(_cli_escape_json_string "$message")
   local area_json='null'
-  if [[ -n \"$area\" ]]; then
-    area_json=\"\\\"$(_cli_escape_json_string \"$area\")\\\"\"
+  if [[ -n $area ]]; then
+    local escaped_area
+    escaped_area=$(_cli_escape_json_string "$area")
+    area_json="\"$escaped_area\""
   fi
-  printf '{\"code\":%s,\"message\":\"%s\",\"area\":%s}\n' \"$code\" \"$escaped_message\" \"$area_json\"
+  printf '{"code":%s,"message":"%s","area":%s}\n' "$code" "$escaped_message" "$area_json"
 }

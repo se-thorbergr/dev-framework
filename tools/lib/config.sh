@@ -18,7 +18,7 @@ lib_config_init_python() {
     return 0
   fi
 
-  if [[ -n "$PYTHON" && -x $(command -v "$PYTHON" 2>/dev/null) ]]; then
+  if [[ -n "$PYTHON" && -x $(command -v "$PYTHON" >/dev/null 2>&1) ]]; then
     LIB_CONFIG_PYTHON_CMD=("$PYTHON")
     return 0
   fi
