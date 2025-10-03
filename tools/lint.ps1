@@ -41,7 +41,7 @@ function Split-Arguments {
     )
 
     if ([string]::IsNullOrWhiteSpace($Value)) {
-        return @()
+        return ,@()
     }
 
     $errors = $null
@@ -56,7 +56,7 @@ function Split-Arguments {
             $result += $token.Content
         }
     }
-    return $result
+    return ,$result
 }
 
 function Resolve-LintTargets {

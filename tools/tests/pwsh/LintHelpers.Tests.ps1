@@ -28,6 +28,14 @@ Describe 'Lint helpers CLI' {
         $LASTEXITCODE | Should -Be 3
     }
 
+    It 'lints markdown file without optional arguments' {
+        $tempDoc = Join-Path $TestDrive 'lint-sample.md'
+        Set-Content -LiteralPath $tempDoc -Value "# heading`n`ntext`n"
+
+        & $script:LintCli --files $tempDoc | Out-Null
+        $LASTEXITCODE | Should -Be 0
+    }
+
     It 'fails with code 1 when file missing' {
         $missing = Join-Path $TestDrive 'missing.sh'
         & $script:LintCli --files $missing | Out-Null

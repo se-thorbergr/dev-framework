@@ -41,6 +41,18 @@ EOF
   [ "$status" -eq 3 ]
 }
 
+@test "lint.sh lints markdown without optional args" {
+  tmp_doc="$BATS_TEST_TMPDIR/lint-sample.md"
+  cat <<'EOF' >"$tmp_doc"
+# heading
+
+text
+EOF
+
+  run bash "$LINT_SH" --files "$tmp_doc"
+  [ "$status" -eq 0 ]
+}
+
 @test "lint.sh handles missing files as failure" {
   run bash "$LINT_SH" --files "$BATS_TEST_TMPDIR/missing.sh"
   [ "$status" -eq 1 ]
