@@ -14,13 +14,19 @@ golden_order:
   - select_files: "staged within docs scope (*.md, *.markdown)"
   - format:
       when: "${MODE} != se"
-      markdown: "npx prettier --write <staged md>"
+      markdown: >
+        git diff --cached --name-only -- '*.md' '*.markdown' \
+          | xargs -r npx prettier --write
   - lint:
       when: "${MODE} != se"
-      markdown: "npx markdownlint -c .markdownlint.jsonc <staged md>"
+      markdown: >
+        git diff --cached --name-only -- '*.md' '*.markdown' \
+          | xargs -r npx markdownlint -c .markdownlint.jsonc
   - link_check:
       when: "${MODE} == tooling"
-      markdown: "markdown-link-check --quiet <staged md>" # optional; can be CI-only
+      markdown: >
+        git diff --cached --name-only -- '*.md' '*.markdown' \
+          | xargs -r markdown-link-check --quiet  # optional; can be CI-only
   - verify_trace: true # capture commands + diffs into .ai/handoffs/
   - present_plan: true
   - commit_rules:

@@ -9,11 +9,33 @@ golden_order:
       command: "git fetch --all --prune && git checkout -b <feature/xyz>"
   - format_staged:
       csharp: "dotnet format --no-restore --include $(git diff --cached --name-only -- '*.cs')"
-      pwsh: "Invoke-Formatter on staged *.ps1|*.psm1|*.psd1; restage"
-      bash: "shfmt -w $(git diff --cached --name-only -- '*.sh')"
+      pwsh: >
+        pwsh -NoLogo -NoProfile -Command "
+          $settings = 'tools/pssa/PSScriptAnalyzerSettings.psd1';
+          $files = @(git diff --cached --name-only -- '*.ps1' '*.psm1' '*.psd1');
+          if ($files.Count -gt 0) {
+            foreach ($file in $files) {
+              $formatted = Invoke-Formatter -ScriptDefinition (Get-Content -Raw -Path $file) -Settings $settings;
+              Set-Content -Path $file -Value $formatted
+            }
+          }
+        "
+      bash: >
+        git diff --cached --name-only -- '*.sh' | xargs -r shfmt -ln bash -i 2 -ci -bn -sr -w
   - lint_verify:
-      pwsh_fix_then_verify: true
-      bash_shellcheck_staged: true
+      pwsh_fix_then_verify: >
+        pwsh -NoLogo -NoProfile -Command "
+          $settings = 'tools/pssa/PSScriptAnalyzerSettings.psd1';
+          $files = @(git diff --cached --name-only -- '*.ps1' '*.psm1' '*.psd1');
+          if ($files.Count -gt 0) {
+            foreach ($file in $files) {
+              Invoke-ScriptAnalyzer -Path $file -Settings $settings
+            }
+          }
+        "
+      bash_shellcheck_staged: >
+        flags="$(grep -v '^[[:space:]]*#' tools/shell/shellcheckrc | xargs)";
+        git diff --cached --name-only -- '*.sh' | xargs -r shellcheck $flags
       csharp_build_warnaserror: true
   - build: "dotnet build -warnaserror" # CI skips this; see ci_minimal_info_only
   - tests:
