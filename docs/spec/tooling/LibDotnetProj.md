@@ -92,11 +92,13 @@ The **Model** MUST expose, at minimum:
 
 ## 7. Normative Requirements
 
-- The library **MUST NOT** write or modify files.
+- The library **MUST NOT** write or modify files (planning-only).
 - Plans and renders **MUST** be **deterministic** and **ASCII-only**.
 - Import enforcement **MUST** be idempotent (no duplicate `<Import>` entries).
 - Item/property planning **MUST** preserve stable ordering when materialized.
 - PowerShell and Bash implementations **MUST** maintain parity.
+- Composite planners (see “Recipes” below) **MUST** be constructed from existing plan helpers and emit deterministic, idempotent plans that callers can review before execution.
+- When handling MSBuild `Condition` attributes, plan builders **MUST** respect existing conditions, ensure edits do not duplicate/conflict across configurations, and surface condition metadata in plan actions so callers understand scope.
 
 ## 8. Outputs
 
