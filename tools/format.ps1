@@ -62,6 +62,10 @@ function Resolve-FormatTargets {
         [string[]]$Candidates
     )
 
+    if ($null -eq $Candidates) {
+        $Candidates = @()
+    }
+
     $set = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $ordered = [System.Collections.Generic.List[string]]::new()
     foreach ($candidate in $Candidates) {

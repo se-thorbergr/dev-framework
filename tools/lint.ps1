@@ -64,6 +64,10 @@ function Resolve-LintTargets {
         [string[]]$Candidates
     )
 
+    if ($null -eq $Candidates) {
+        $Candidates = @()
+    }
+
     $set = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $ordered = [System.Collections.Generic.List[string]]::new()
     foreach ($candidate in $Candidates) {
@@ -364,6 +368,51 @@ elseif ($hasWork) {
                 default {
                     Add-SummaryItem -Kind 'error' -Message "markdownlint exited with code $lintExit."
                     $exitCode = 1
+                }
+            }
+
+            $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+            $mermaidCliCandidates = @(
+                (Join-Path $repoRoot 'node_modules/.bin/mmdc'),
+                (Join-Path $repoRoot 'node_modules/.bin/mmdc.cmd')
+            )
+            $mermaidCliPath = $mermaidCliCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+            if (-not $mermaidCliPath) {
+                Write-Log -Level 'info' -Message 'Mermaid CLI not installed; skipping diagram validation.'
+            } else {
+                $diagramCount = 0
+                $diagramFailures = 0
+                foreach ($mdFile in $mdFiles) {
+                    $content = Get-Content -LiteralPath $mdFile -Raw
+                    $matches = [regex]::Matches($content, '(?ms)```mermaid\s*(.*?)```')
+                    if ($matches.Count -eq 0) { continue }
+                    foreach ($match in $matches) {
+                        $diagram = $match.Groups[1].Value.Trim()
+                        if ([string]::IsNullOrWhiteSpace($diagram)) { continue }
+                        $diagramCount += 1
+                        $tempInput = [System.IO.Path]::GetTempFileName()
+                        $tempOutput = "$tempInput.svg"
+                        try {
+                            [System.IO.File]::WriteAllText($tempInput, $diagram, [System.Text.Encoding]::UTF8)
+                            & $mermaidCliPath '--input' $tempInput '--output' $tempOutput '--quiet' | Out-Null
+                            if ($LASTEXITCODE -ne 0) {
+                                $diagramFailures += 1
+                                Write-Log -Level 'info' -Message "ERROR: Mermaid diagram validation failed in $mdFile"
+                            }
+                        } finally {
+                            Remove-Item -LiteralPath $tempInput -ErrorAction SilentlyContinue
+                            Remove-Item -LiteralPath $tempOutput -ErrorAction SilentlyContinue
+                        }
+                    }
+                }
+
+                if ($diagramCount -gt 0) {
+                    if ($diagramFailures -gt 0) {
+                        Add-SummaryItem -Kind 'error' -Message "$diagramFailures Mermaid diagram(s) failed validation." -Data "validated=$diagramCount"
+                        $exitCode = 1
+                    } else {
+                        Add-SummaryItem -Kind 'info' -Message "Validated $diagramCount Mermaid diagram(s)."
+                    }
                 }
             }
         }
