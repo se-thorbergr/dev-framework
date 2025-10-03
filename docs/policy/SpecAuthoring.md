@@ -34,7 +34,7 @@ All specs **MUST** contain these numbered sections in this exact order:
 14. **Open Questions / Future Enhancements**
 15. **Change Log** (append-only; newest at bottom)
 
-> **Presence rule:** If a section does not apply, keep the heading and write a single line: “Not applicable - <reason>.”
+> **Presence rule:** If a section does not apply, keep the heading and write a single line: “Not applicable - reason goes here.”
 
 ## 3. Section 4 Contract Variant & Profiles
 
@@ -84,7 +84,7 @@ This policy applies to all specs under `docs/spec/**`. Two profiles are recogniz
 
 ## 9. Change Log (Section 15)
 
-- On every edit, **update the top metadata banner** to today's date: `Last updated: YYYY-MM-DD - Owner: <name>`.
+- On every edit, **update the top metadata banner** to today's date: `Last updated: YYYY-MM-DD - Owner: NAME`.
 - Then append a row **at the bottom**: `| YYYY-MM-DD | change summary | approver |`.
 - Keep the policy notice line above the table unmodified.
 
