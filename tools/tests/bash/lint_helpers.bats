@@ -53,3 +53,12 @@ EOF
   run bash "$ROOT_DIR/tools/lint-staged.sh" --dry-run
   [ "$status" -eq 0 ]
 }
+
+@test "lint.sh warns but succeeds when only unsupported files provided" {
+  unsupported="$ROOT_DIR/tools/puppeteer/headless.json"
+  [ -f "$unsupported" ]
+
+  run bash "$LINT_SH" --dry-run --files "$unsupported"
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "Unsupported file type" ]]
+}

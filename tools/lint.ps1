@@ -104,6 +104,12 @@ $context = Initialize-Cli -Args $Args
 $flags = $context.Flags
 $unknown = $context.UnknownArgs
 
+if ($null -eq $unknown) {
+    $unknown = @()
+} elseif ($unknown -isnot [System.Array]) {
+    $unknown = @($unknown)
+}
+
 $files = New-Object System.Collections.Generic.List[string]
 $shellcheckOverride = ''
 $pssaSettings = Join-Path $PSScriptRoot 'pssa/PSScriptAnalyzerSettings.psd1'
@@ -199,6 +205,8 @@ while ($i -lt $unknown.Count) {
     $i += 1
 }
 
+$explicitTargetsProvided = $files.Count -gt 0
+
 $targets = Resolve-LintTargets -Candidates $files.ToArray()
 
 if ($targets.Count -eq 0) {
@@ -250,7 +258,7 @@ foreach ($path in $resolvedFiles) {
     }
 }
 
-$exitCode = if ($missingFiles.Count -gt 0 -or $unsupported.Count -gt 0) { 1 } else { 0 }
+$exitCode = if ($missingFiles.Count -gt 0) { 1 } else { 0 }
 $hasWork = ($csFiles.Count + $psFiles.Count + $shFiles.Count + $mdFiles.Count) -gt 0
 
 foreach ($item in $unsupported) {

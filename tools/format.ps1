@@ -79,6 +79,12 @@ $context = Initialize-Cli -Args $Args
 $flags = $context.Flags
 $unknown = $context.UnknownArgs
 
+if ($null -eq $unknown) {
+    $unknown = @()
+} elseif ($unknown -isnot [System.Array]) {
+    $unknown = @($unknown)
+}
+
 $files = New-Object System.Collections.Generic.List[string]
 $shfmtFlagsRaw = '-ln bash -i 2 -ci -bn -sr'
 $dotnetArgsRaw = ''

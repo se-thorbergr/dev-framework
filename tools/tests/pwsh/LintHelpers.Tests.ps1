@@ -44,4 +44,13 @@ Describe 'Lint helpers CLI' {
         & $wrapper --dry-run | Out-Null
         $LASTEXITCODE | Should -Be 0
     }
+
+    It 'warns but succeeds when unsupported files are provided' {
+        $unsupported = Join-Path $PSScriptRoot '../../puppeteer/headless.json'
+        Test-Path $unsupported | Should -BeTrue
+
+        $output = & $script:LintCli --dry-run --files $unsupported
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match 'Unsupported file type'
+    }
 }
