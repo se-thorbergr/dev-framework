@@ -61,9 +61,24 @@ Last updated: 2025-09-28 - Owner: geho
 
 ### 4.3 Required/optional fields (normative)
 
-- **Required keys (config):** `[mdk2] template_version`, `[project] name` (names illustrative; exact keys to be finalized per repo schema).
-- **Optional keys:** `[paths] scripts_dir`, `[build] target`.
-- The library MUST tolerate missing optional keys and report actionable warnings.
+`LibMDK2` treats `docs/mdk2.wiki/MDK²-Project-Configuration-Guide.md` (synced from the upstream wiki) as the authoritative schema for `*.mdk.ini` and `*.mdk.local.ini`. The library MUST enforce the following:
+
+- **Required section:** `[mdk]` MUST be present in every config file (tracked and local).
+- **Keys defined by the guide:**
+
+  | Key          | Allowed values                                  | Typical file                | Notes                                                                |
+  | ------------ | ----------------------------------------------- | --------------------------- | -------------------------------------------------------------------- |
+  | `type`       | `programmableblock`, `mod`                      | `.mdk.ini` (tracked)        | Set by template; SHOULD remain unchanged.                            |
+  | `trace`      | `on`, `off`                                     | Either                      | Debug logging for MDK tooling (default `off`).                       |
+  | `minify`     | `none`, `trim`, `stripcomments`, `lite`, `full` | Either                      | Controls code minification level.                                    |
+  | `ignores`    | Comma-separated glob patterns                   | Either                      | Excluded files when building scripts.                                |
+  | `donotclean` | Comma-separated glob patterns                   | Either                      | Protected files when cleaning mods.                                  |
+  | `output`     | `auto` or explicit path                         | `.mdk.local.ini` (override) | Determines script output directory; local overrides take precedence. |
+  | `binarypath` | `auto` or explicit path                         | `.mdk.local.ini` (override) | Overrides MDK binary discovery (e.g., Space Engineers `Bin64`).      |
+
+- **Additional keys:** The guide may introduce new `[mdk]` keys over time. `LibMDK2` MUST preserve unknown keys, warn only when values conflict with policy, and surface them in diagnostics.
+- **Local overrides:** `.mdk.local.ini` entries override tracked `.mdk.ini` values. Diagnostics MUST clarify which file supplied each value.
+- **Other sections:** Repo-specific tooling MAY add additional sections (e.g., `[paths]`). The library MUST tolerate these sections, ensuring they do not block validation.
 
 ## 5. Workflow
 
@@ -86,6 +101,7 @@ Last updated: 2025-09-28 - Owner: geho
 - **Deterministic outputs:** Given the same inputs, outputs MUST be stable across shells and runs.
 - **ASCII-only renders:** All emitted text MUST be ASCII-only.
 - **Parity:** PowerShell and Bash implementations MUST maintain behavior parity.
+- **Cross-file consistency:** When multiple MDK2 configs are discovered (e.g., tracked + local overrides), the library MUST compare the `[mdk]` keys defined by the guide (`type`, `trace`, `minify`, `ignores`, `donotclean`, `output`, `binarypath`). Conflicts MUST surface as warnings (or errors when they break policy). Diagnostics MUST name the conflicting files and values so callers can resolve drift.
 
 ## 8. Outputs
 
@@ -125,9 +141,7 @@ Last updated: 2025-09-28 - Owner: geho
 
 ## 14. Open Questions / Future Enhancements
 
-- Finalize the **authoritative key names** and sections in `*.mdk.ini` for this repo.
-- Should the library validate cross-file consistency when multiple MDK2 configs are present?
-- Provide adapters for common CI systems to format diagnostics automatically?
+- Provide adapters for common CI systems to format diagnostics automatically using `LibCli`’s CI annotation helpers (GitHub, Azure DevOps, etc.). This enhancement would surface errors inline in PRs while keeping plain summaries for other environments.
 
 ## 15. Change Log
 

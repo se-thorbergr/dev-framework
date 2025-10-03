@@ -1,0 +1,3 @@
+[submodule "docs/mdk2.wiki"]
+	path = docs/mdk2.wiki
+	url = https://github.com/malforge/mdk2.wiki.git
