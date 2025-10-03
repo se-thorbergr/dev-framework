@@ -69,8 +69,9 @@ Last updated: 2025-10-14 - Owner: geho
 5. **Execute linters:**
    - PowerShell: run `Invoke-ScriptAnalyzer` using repo settings with optional `--fix:$false` (analysis only).
    - Bash: run `shellcheck` using repo rc plus overrides.
-   - Markdown: run `npx markdownlint` with repo configuration (and extra args when provided).
+   - Markdown: run `npx markdownlint --config .markdownlint.jsonc ...`; helpers MAY follow up with `npx @mermaid-js/mermaid-cli` checks when available to validate diagrams.
    - C# (optional): run `dotnet build -warnaserror` when `--dotnet-build` and C# files detected (honour extra args).
+   - NPM scripts (`npm run lint`, `npm run lint:staged`, `npm run lint:docs`) MUST remain thin wrappers around the helper CLI to keep behaviour consistent between humans, CI, and AI agents.
 6. **Aggregate results:** capture warnings/errors per tool; treat `--fail-on-warn` as elevated severity.
 7. **Dry-run:** if `--dry-run`, log intended commands and exit `3` without running the tools.
 8. **Summaries:** report successes/failures per language and emit JSON when requested.
@@ -86,7 +87,7 @@ Last updated: 2025-10-14 - Owner: geho
 
 - The helpers **MUST** detect missing linters and report actionable guidance without crashing.
 - The helpers **MUST** exit with code `1` when lint findings reach error severity or when `--fail-on-warn` is set and warnings occur.
-- The helpers **MUST** lint Markdown inputs with markdownlint (or surface a clear error when the tool is unavailable).
+- The helpers **MUST** lint Markdown inputs with `markdownlint` and SHOULD validate Mermaid diagrams via `@mermaid-js/mermaid-cli` when it is available (otherwise log that validation was skipped).
 - The helpers **MUST NOT** modify source files; linting is read-only.
 - The helpers **SHOULD** honour `${MODE}`: skip linters in SE mode when policy forbids local execution, while CI enforces warnings.
 - The helpers **MAY** allow opt-in dotnet build checks when `--dotnet-build` is set.
@@ -105,8 +106,9 @@ Last updated: 2025-10-14 - Owner: geho
 | LNT-002 | ScriptAnalyzer module missing                          | Install module (`Install-Module PSScriptAnalyzer`); rerun.          |
 | LNT-003 | `npx markdownlint` unavailable                         | Install Node.js 20.x+, ensure repo dependencies are present; rerun. |
 | LNT-004 | Dotnet command missing when `--dotnet-build` requested | Install .NET SDK 9.x or omit the flag.                              |
-| LNT-005 | Unsupported file extension passed                      | Remove or ignore the file; tool exits with `1`.                     |
-| LNT-006 | Linter produces warnings/errors                        | Fix the reported issues or suppress via repo policy; rerun.         |
+| LNT-005 | Mermaid CLI missing (optional validation skipped)      | Install `@mermaid-js/mermaid-cli`; rerun to validate diagrams.      |
+| LNT-006 | Unsupported file extension passed                      | Remove or ignore the file; tool exits with `1`.                     |
+| LNT-007 | Linter produces warnings/errors                        | Fix the reported issues or suppress via repo policy; rerun.         |
 
 ## 10. Validation & Testing
 
@@ -145,3 +147,4 @@ Last updated: 2025-10-14 - Owner: geho
 | ---------- | -------------------------------------------------------------- | ----------- |
 | 2025-10-14 | Initial specification draft.                                   | geho        |
 | 2025-10-14 | Added Markdown linting support and Node tooling prerequisites. | geho        |
+| 2025-10-14 | Documented optional Mermaid CLI validation and npm script expectations. | geho        |

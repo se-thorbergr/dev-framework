@@ -1,6 +1,23 @@
 {
+  "name": "dev-framework-tooling",
+  "private": true,
+  "engines": {
+    "node": "^20.0.0"
+  },
+  "scripts": {
+    "format": "pwsh tools/format.ps1 --files",
+    "format:staged": "pwsh tools/format-staged.ps1",
+    "lint": "pwsh tools/lint.ps1 --fail-on-warn --files",
+    "lint:staged": "pwsh tools/lint-staged.ps1 --fail-on-warn",
+    "lint:docs": "pwsh -NoLogo -NoProfile -Command \"$files = git ls-files '*.md'; if ($files) { & 'tools/lint.ps1' --fail-on-warn --files $files } else { Write-Host 'No markdown files to lint.' }\"",
+    "ci:format-check": "pwsh tools/format.ps1 --dry-run",
+    "ci:lint-check": "pwsh tools/lint.ps1 --dry-run --fail-on-warn"
+  },
   "dependencies": {
-    "@openai/codex": "^0.39.0",
+    "@openai/codex": "^0.39.0"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^10.9.1",
     "@prettier/plugin-xml": "^3.4.2",
     "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",

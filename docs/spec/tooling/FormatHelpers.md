@@ -67,7 +67,8 @@ Last updated: 2025-10-14 - Owner: geho
    - For C#: run `dotnet format --no-restore --include ...` in batches.
    - For PowerShell: pipe each file through `Invoke-Formatter` with repo settings.
    - For Bash: run `shfmt` with repo flags.
-   - For Markdown: run `npx prettier --write` with optional extra arguments.
+   - For Markdown: run `npx prettier --write ...`; Mermaid diagrams are not auto-formatted (helpers emit TODO logs if specialized tooling is desired).
+   - NPM scripts (`npm run format`, `npm run format:staged`) MUST remain thin wrappers that forward to the helper CLI, ensuring humans and automation share one implementation.
 6. **Dry-run handling:** when `--dry-run`, log intended commands, collect summary entries, and return exit code `3`.
 7. **Post-actions:** emit summaries, report missing tools, and surface aggregated errors while preserving ASCII output.
 
@@ -83,7 +84,7 @@ Last updated: 2025-10-14 - Owner: geho
 
 - The helpers **MUST** maintain feature parity between PowerShell and Bash implementations.
 - The helpers **MUST** respect `--dry-run` by refraining from modifying files and by exiting with code `3` if changes would occur.
-- The helpers **MUST** format Markdown inputs with Prettier using repo defaults when the tool is available (or skip with a clear error when missing).
+- The helpers **MUST** format Markdown inputs (including Mermaid code blocks) with Prettier + `prettier-plugin-mermaid` when available, or emit a clear error when the plugin is missing.
 - The helpers **MUST** restrict formatting operations to files explicitly provided (no globbing beyond caller intent).
 - The helpers **MUST NOT** write to files outside the repo boundary or to read-only policy paths (`*.mdk.ini`, `.ai/**`).
 - The helpers **SHOULD** short-circuit when no supported files remain after filtering.
@@ -143,3 +144,4 @@ Last updated: 2025-10-14 - Owner: geho
 | ---------- | ------------------------------------------------------------- | ----------- |
 | 2025-10-14 | Initial specification draft.                                  | geho        |
 | 2025-10-14 | Added Markdown formatting coverage and Prettier requirements. | geho        |
+| 2025-10-14 | Documented npm helper scripts; Mermaid formatting remains manual. | geho    |

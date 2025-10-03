@@ -41,6 +41,7 @@ The development framework manages submodules, build, and CI, and enforces policy
 - Run `pwsh tools/lint-staged.ps1 --dry-run` to check staged files with ScriptAnalyzer, ShellCheck, markdownlint, and optional `dotnet build`.
 - Use `pwsh tools/format.ps1 --files path/to/file.md` (or `bash tools/format.sh`) when you want to format specific files before staging them.
 - Use `pwsh tools/lint.ps1 --files path/to/file.md --fail-on-warn` to lint explicit files while you iterate.
+- Prefer the npm shortcuts: `npm run format -- <files>`, `npm run lint -- <files>`, or their `*:staged` variants route through the same helpers; Markdown is formatted with Prettier and Mermaid diagrams can be validated with `@mermaid-js/mermaid-cli` when installed.
 
 ## Important Note
 

@@ -21,6 +21,11 @@ This policy defines the supported development and build environment for the dev-
 - **Space Engineers Bin64:** The `binarypath` used by builds. Developers must ensure the folder is accessible.
 - **Node.js + npm:** Required in `tooling` mode; optional in `se` mode (CI still runs docs/config checks). Used by docs/config workflows (e.g., Prettier, markdownlint) and for optional Codex CLI. Tooling must detect existing installs before offering guided installation.
 
+### Node.js version management
+
+- The repo ships an `.nvmrc` file (currently `v20.10.0`). Run `nvm install` followed by `nvm use` from the repo root to align with the required Node version before running `npm install`.
+- Tooling and documentation MUST reference `.nvmrc` as the source of truth for the supported Node.js version. When the Node requirement changes, update `.nvmrc`, rerun `npm install`, and refresh this policy.
+
 ## Installation Guidance
 
 - Surface package-manager flows first: `winget` on Windows and `apt` on Debian/Ubuntu. When running with `--auto-install`, tooling may execute these commands directly after confirming with the developer. Use official sources for Python (`winget install Python.Python.3`, `sudo apt install python3 python3-venv`) when Bash tooling requires it.
