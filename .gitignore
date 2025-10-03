@@ -220,6 +220,7 @@ vite.config.ts.timestamp-*
 .devfw-mode.local
 se-config.local.ini
 external/
+testResults.xml
 
 ##
 ## AI specific
