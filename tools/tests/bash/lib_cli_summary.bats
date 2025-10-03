@@ -10,6 +10,31 @@ load_helper() {
   source "$LIB_PATH"
 }
 
+find_python() {
+  if [[ -n "$PYTHON" && -x $(command -v "$PYTHON" 2>/dev/null) ]]; then
+    PYTHON_CMD=("$PYTHON")
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD=(python3)
+    return 0
+  fi
+
+  if command -v python >/dev/null 2>&1; then
+    PYTHON_CMD=(python)
+    return 0
+  fi
+
+  if command -v py >/dev/null 2>&1; then
+    PYTHON_CMD=(py -3)
+    return 0
+  fi
+
+  echo "Python interpreter not found" >&2
+  return 1
+}
+
 setup() {
   load_helper
 }
@@ -26,12 +51,15 @@ setup() {
 
   run summary_emit json
   [ "$status" -eq 0 ]
+  json_output="$output"
 
-  schema=$(python3 -c 'import json,sys; data=json.loads(sys.stdin.read()); print(data.get("schema"))' <<<"$output")
+  find_python || skip "Python interpreter required"
+
+  schema=$("${PYTHON_CMD[@]}" -c 'import json, sys; data = json.loads(sys.stdin.read()); print(data.get("schema"))' <<<"$json_output")
   [[ "$schema" == "v1" ]]
 
-  ci_enabled=$(python3 -c 'import json,sys; data=json.loads(sys.stdin.read()); print(str(data.get("ci", {}).get("enabled", False)).lower())' <<<"$output")
-  [[ "$ci_enabled" == "true" ]]
+  ci_value=$("${PYTHON_CMD[@]}" -c 'import json, sys; data = json.loads(sys.stdin.read()); print(str(data.get("ci", {}).get("enabled", False)).lower())' <<<"$json_output")
+  [[ "$ci_value" == "true" ]]
 }
 
 @test "version_emit includes api_version" {
