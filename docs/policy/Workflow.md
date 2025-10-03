@@ -137,8 +137,8 @@ flowchart TD
   Verify --> End([Handoff / Commit])
 
   %% Notes
-  note right of Format: Uses tools/format.ps1 internally (C#, PowerShell, Bash, Markdown)
-  note right of Lint: Uses tools/lint.ps1 (markdownlint + optional Mermaid validation)
+  Format -.-> FormatDetail["Uses tools/format.ps1 internally (C#, PowerShell, Bash, Markdown)"]
+  Lint   -.-> LintDetail["Uses tools/lint.ps1 (markdownlint + optional Mermaid validation)"]
 
   %% CI minimal info path
   Security -.-> CIMin["CI-only checks (format/lint dry-runs)"]
@@ -149,10 +149,10 @@ flowchart TD
 ```mermaid
 flowchart TD
   Start([Start]) --> SelectDocs["Select staged Markdown files"]
-  SelectDocs --> FormatDocs["If `${MODE} != se`, run `pwsh tools/format.ps1 --files …`"]
-  FormatDocs --> LintDocs["If `${MODE} != se`, run `pwsh tools/lint.ps1 --files … --fail-on-warn`"]
-  LintDocs --> LinkCheck{`${MODE} == tooling`?}
-  LinkCheck -->|Yes| RunLink["`markdown-link-check --quiet` on staged docs"]
+  SelectDocs --> FormatDocs["If MODE != se, run pwsh tools/format.ps1 --files ..."]
+  FormatDocs --> LintDocs["If MODE != se, run pwsh tools/lint.ps1 --files ... --fail-on-warn"]
+  LintDocs --> LinkCheck{MODE == tooling}
+  LinkCheck -->|Yes| RunLink["Run markdown-link-check (quiet) on staged docs"]
   LinkCheck -->|No| SkipLink["Skip link check"]
   RunLink --> VerifyDocs["Record verify trace, present plan"]
   SkipLink --> VerifyDocs
@@ -164,10 +164,10 @@ flowchart TD
 ```mermaid
 flowchart TD
   Start([Start]) --> SelectConfig["Select staged config files (*.yml, *.yaml, *.json)"]
-  SelectConfig --> ModeCheck{`${MODE} == se`?}
+  SelectConfig --> ModeCheck{MODE == se}
   ModeCheck -->|Yes| SkipAll["Skip local format/lint; CI enforces"]
-  ModeCheck -->|No| FormatConfig["Run `npx prettier --write` on YAML/JSON"]
-  FormatConfig --> LintConfig["Run `yamllint` / `jq` validation"]
+  ModeCheck -->|No| FormatConfig["Run npx prettier (write) on YAML/JSON"]
+  FormatConfig --> LintConfig["Run yamllint / jq validation"]
   SkipAll --> VerifyConfig["Record verify trace, present plan"]
   LintConfig --> VerifyConfig
   VerifyConfig --> EndConfig([Handoff / Commit])

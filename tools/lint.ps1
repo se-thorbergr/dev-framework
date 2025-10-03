@@ -390,6 +390,7 @@ elseif ($hasWork) {
             } else {
                 $diagramCount = 0
                 $diagramFailures = 0
+                $mermaidLaunchFailed = $false
                 foreach ($mdFile in $mdFiles) {
                     $content = Get-Content -LiteralPath $mdFile -Raw
                     $matches = [regex]::Matches($content, '(?ms)```mermaid\s*(.*?)```')
@@ -402,20 +403,39 @@ elseif ($hasWork) {
                         $tempOutput = "$tempInput.svg"
                         try {
                             [System.IO.File]::WriteAllText($tempInput, $diagram, [System.Text.Encoding]::UTF8)
-                            & $mermaidCliPath '--input' $tempInput '--output' $tempOutput '--quiet' | Out-Null
+                            $mermaidOutput = & $mermaidCliPath '--input' $tempInput '--output' $tempOutput '--quiet' 2>&1
                             if ($LASTEXITCODE -ne 0) {
+                                $outputText = ($mermaidOutput | Out-String).Trim()
+                                if ($outputText -match 'Failed to launch the browser process') {
+                                    $mermaidLaunchFailed = $true
+                                    Write-Log -Level 'info' -Message 'WARNING: Mermaid validation skipped (browser launch blocked).'
+                                    if ($outputText) {
+                                        Write-Log -Level 'debug' -Message $outputText
+                                    }
+                                    break
+                                }
+
                                 $diagramFailures += 1
                                 Write-Log -Level 'info' -Message "ERROR: Mermaid diagram validation failed in $mdFile"
+                                if ($outputText) {
+                                    $snippet = if ($outputText.Length -gt 400) { $outputText.Substring(0, 400) + '…' } else { $outputText }
+                                    Write-Log -Level 'info' -Message "Mermaid CLI output: $snippet"
+                                    Write-Log -Level 'debug' -Message $outputText
+                                }
                             }
                         } finally {
                             Remove-Item -LiteralPath $tempInput -ErrorAction SilentlyContinue
                             Remove-Item -LiteralPath $tempOutput -ErrorAction SilentlyContinue
                         }
                     }
+                    if ($mermaidLaunchFailed) { break }
                 }
 
                 if ($diagramCount -gt 0) {
-                    if ($diagramFailures -gt 0) {
+                    if ($mermaidLaunchFailed) {
+                        Add-SummaryItem -Kind 'warning' -Message 'Mermaid validation skipped (browser launch blocked).'
+                    }
+                    elseif ($diagramFailures -gt 0) {
                         Add-SummaryItem -Kind 'error' -Message "$diagramFailures Mermaid diagram(s) failed validation." -Data "validated=$diagramCount"
                         $exitCode = 1
                     } else {
