@@ -48,9 +48,9 @@ rules:
         - "docs/spec/**/{*,*/*.md}"
         - "!docs/spec/**/README.md"
       check: regex
-      pattern: "^_Last updated: [0-9]{4}-[0-9]{2}-[0-9]{2} - Owner: .+_\n"
+      pattern: "^Last updated: [0-9]{4}-[0-9]{2}-[0-9]{2} - Owner: .+\n"
       anchors: [start]
-      message: "Add top metadata banner: '_Last updated: YYYY-MM-DD - Owner: <name>_'."
+      message: "Add top metadata banner: 'Last updated: YYYY-MM-DD - Owner: <name>'."
 
     - id: changelog-policy-line
       check: contains
@@ -197,6 +197,6 @@ ci:
       - debug-alias-note
   messages:
     sections-order: "Headings out of order or mismatched. Use the template and allowed variants for 4 and 10."
-    top-banner-present: "Add or update the top '_Last updated: ... - Owner: ..._' line."
+    top-banner-present: "Add or update the top 'Last updated: ... - Owner: ...' line."
 
 precedence: [pragma, pins, overrides, default]
