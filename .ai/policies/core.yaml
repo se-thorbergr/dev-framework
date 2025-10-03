@@ -61,9 +61,9 @@ tools:
   required_by_mode:
     se:
       required: [dotnet, mdk2]
-      optional: [node, npm, prettier, markdownlint, yamllint, jq, psscriptanalyzer, shfmt, shellcheck]
+      optional: [python, node, npm, prettier, markdownlint, yamllint, jq, psscriptanalyzer, shfmt, shellcheck]
     tooling:
-      required: [dotnet, node, npm]
+      required: [dotnet, node, npm, python]
       recommended: [prettier, markdownlint, yamllint, jq, psscriptanalyzer, shfmt, shellcheck]
 
 # Runtime variables available to workflows

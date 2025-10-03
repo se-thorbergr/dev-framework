@@ -37,6 +37,7 @@ This policy describes how the maintainer (human developer) and the AI assistant 
 - For regressions, add a failing test that reproduces the issue, then fix to green.
 - Prefer component-style tests that exercise script entry points (flags/inputs) rather than internal helpers.
 - `--help`/`--version` output **must** be stable and parseable in tests; `--dry-run` paths **must** have no side effects.
+- Bash-based tests may invoke Python helpers for JSON parsing. Ensure an interpreter (`python3`, `python`, or `py -3`) is visible on `PATH` (or exported via `PYTHON`/`PYTHON_CMD`) before running suites locally or in CI.
 
 ## Verification
 

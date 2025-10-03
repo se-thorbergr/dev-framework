@@ -93,6 +93,7 @@ Last updated: 2025-10-02 - Owner: geho
 - JSON summary emission (`--summary-format json`, `--summary-json <path>`) **MUST** produce identical schema v1 payloads across shells with deterministic key ordering and ASCII-only content.
 - `--help`/`--version` outputs **MUST** be stable and parseable for tests.
 - CI annotations **MUST** degrade gracefully when CI is not detected or `--ci` not set.
+- Bash implementations MAY invoke Python helpers for JSON handling; tooling **MUST** ensure a Python 3.10+ interpreter is available (via `python3`, `python`, `py -3`, or `PYTHON`/`PYTHON_CMD`).
 
 ## 8. Outputs
 
@@ -115,6 +116,7 @@ Last updated: 2025-10-02 - Owner: geho
 - Unit tests: validate argument parsing (with/without extra options), logging prefixes, summary generation, CI annotation formatting.
 - Integration tests: create sample scripts (one PS, one Bash) that consume the library and exercise dry-run + summary + CI flows.
 - CI should run both unit and integration tests on Windows and Linux runners.
+- Bash suites MUST verify that a Python interpreter is discoverable when the implementation depends on it and skip gracefully when unavailable.
 
 ## 11. Acceptance Criteria
 
@@ -167,3 +169,4 @@ Resolved: JSON summary requirements now live in Sections 5, 7, 8, 11, and 13.
 | 2025-09-28 | Clarified Section 4 as non-normative; retitled to "API contract (overview, non-normative)" and added explicit pointer to Lib\*.md for function signatures.                               | geho        |
 | 2025-10-02 | Documented Normalize-TextFile, spinner, and JSON summary requirements across workflow, configuration, norms, outputs, telemetry, security, acceptance; closed related open questions.    | geho        |
 | 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                                                            | geho        |
+| 2025-10-02 | Noted Python dependency for Bash helpers and test expectations (Sections 7 & 10).                                                                                                        | geho        |

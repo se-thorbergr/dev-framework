@@ -16,16 +16,17 @@ This policy defines the supported development and build environment for the dev-
 
 - **dotnet SDK 9.0.x:** Provides Roslyn compiler and libraries required for MDK2 builds. Visual Studio is optional.
 - **PowerShell 7.x:** Required on Windows; optional on Linux unless the developer intends to run the PowerShell version of tooling.
+- **Python 3.10+** (CPython): Required for Bash-based tooling and tests (JSON parsing, config helpers). venv usage is supported but optional; ensure the chosen interpreter is on `PATH` or exposed via the `PYTHON`/`PYTHON_CMD` environment variables.
 - **MDK2 templates (Mal.Mdk2.ScriptTemplates 2.2.31):** Installed via `dotnet new --install`.
 - **Space Engineers Bin64:** The `binarypath` used by builds. Developers must ensure the folder is accessible.
 - **Node.js + npm:** Required in `tooling` mode; optional in `se` mode (CI still runs docs/config checks). Used by docs/config workflows (e.g., Prettier, markdownlint) and for optional Codex CLI. Tooling must detect existing installs before offering guided installation.
 
 ## Installation Guidance
 
-- Surface package-manager flows first: `winget` on Windows and `apt` on Debian/Ubuntu. When running with `--auto-install`, tooling may execute these commands directly after confirming with the developer.
+- Surface package-manager flows first: `winget` on Windows and `apt` on Debian/Ubuntu. When running with `--auto-install`, tooling may execute these commands directly after confirming with the developer. Use official sources for Python (`winget install Python.Python.3`, `sudo apt install python3 python3-venv`) when Bash tooling requires it.
 - Provide clear fallback steps when package managers are unavailable or declined:
-  - Windows: list official Microsoft download links for dotnet/PowerShell MSIs and the `nvm-setup.exe` installer for Node.js. Remind developers to verify publisher information, digital signatures, and license terms before executing. For Bash tests (`bats`), winget is **not** available; prefer **WSL** (recommended), or **MSYS2** with `pacman`, or manual install per the bats-core installation guide (see https://bats-core.readthedocs.io/en/stable/installation.html).
-  - Debian/Ubuntu: explain how to install from official repositories (`sudo apt update && sudo apt install ...`). If developers choose manual or third-party sources, log that they must maintain updates themselves.
+  - Windows: list official Microsoft download links for dotnet/PowerShell MSIs, `Python` installers (or the Store-distributed build via `winget`), and the `nvm-setup.exe` installer for Node.js. Remind developers to verify publisher information, digital signatures, and license terms before executing. For Bash tests (`bats`), winget is **not** available; prefer **WSL** (recommended), or **MSYS2** with `pacman`, or manual install per the bats-core installation guide (see <https://bats-core.readthedocs.io/en/stable/installation.html>).
+  - Debian/Ubuntu: explain how to install from official repositories (`sudo apt update && sudo apt install ...`, including `python3`/`python3-venv`). If developers choose manual or third-party sources, log that they must maintain updates themselves.
 - Always offer a “manage manually” option before automated actions so contributors can apply corporate tooling or existing installs.
 - The setup spec (`docs/spec/tooling/SetupTooling.md`) governs interactive prompts and CLI overrides (`--auto-install`, `--notes-only`, etc.).
 

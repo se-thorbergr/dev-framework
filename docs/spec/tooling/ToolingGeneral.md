@@ -22,7 +22,7 @@ Last updated: 2025-09-30 - Owner: geho
 
 ## 2. Preconditions & Assumptions
 
-- PowerShell 7.x and Bash are supported shells.
+- PowerShell 7.x and Bash are supported shells. Bash-based tooling assumes a Python 3.10+ interpreter is available (discoverable via `python3`, `python`, `py -3`, or the `PYTHON`/`PYTHON_CMD` environment variables).
 - ASCII-only console output; tools must redact/avoid secrets.
 - CI runs in info-only mode for SE solutions; builds are local-only.
 
@@ -183,3 +183,4 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-30 | Added Section 5.2 summary matrix for Local vs CI/GitHub behavior.                                                                                                     | geho        |
 | 2025-09-30 | Added SoT pointer in Section 5 to `.ai/policies/core.yaml → modes`.                                                                                                   | geho        |
 | 2025-10-02 | Normalized "Last updated" line formatting, resolved markdownlint findings, and documented Section 14 decisions.                                                       | geho        |
+| 2025-10-02 | Recorded Python 3 prerequisite for Bash tooling in Section 2.                                                                                                         | geho        |

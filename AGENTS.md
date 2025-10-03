@@ -55,7 +55,7 @@
 
 ## Non-AI rules
 
-- Coding style, environment, and human workflow: see `docs/policy/CodingStyle.md`, `docs/policy/Environment.md`, `docs/policy/Workflow.md`.
+- Coding style, environment, and human workflow: see `docs/policy/CodingStyle.md`, `docs/policy/Environment.md`, `docs/policy/Workflow.md` (note: Python 3.10+ is a required dependency alongside PowerShell and Bash for tooling/tests).
 
 ## Commit Messages
 
@@ -120,7 +120,7 @@
 
 ### Minimal bootstrap for agents (pseudocode)
 
-```
+```text
 load('.ai/policies/core.yaml')
 load('.ai/policies/routing.yaml')
 scope = detect_scope(file)  # 'docs' for *.md|*.markdown; config for *.ya?ml|*.json|*.ini; else 'code'

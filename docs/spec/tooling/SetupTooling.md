@@ -29,7 +29,7 @@ Last updated: 2025-09-30 - Owner: geho
 
 ## 2. Preconditions & Assumptions
 
-- Required versions: PowerShell 7.x; dotnet SDK 9.0.x; MDK2 templates 2.2.31.
+- Required versions: PowerShell 7.x; dotnet SDK 9.0.x; Python 3.10+ (for Bash tooling/tests); MDK2 templates 2.2.31.
 - Supported OS: Windows and Debian/Ubuntu Linux.
 - Assumes Steam and Space Engineers are installed on at least one OS; cross-OS access to `Bin64` path may be used.
 - Network access for package managers (`winget`, `apt`) when `--auto-install` is used.
@@ -42,7 +42,7 @@ Last updated: 2025-09-30 - Owner: geho
 
 - Behavior follows the requirements documented in `docs/policy/Environment.md`.
 - Supported runtimes: PowerShell 7.x (`Setup.ps1`) and Bash (`setup.sh`) with equivalent CLI surface and behavior (see `ToolingGeneral.md` for shared options).
-- Requires dotnet CLI 9.0.x with `Mal.Mdk2.ScriptTemplates` package version 2.2.31 available for `dotnet new`.
+- Requires dotnet CLI 9.0.x with `Mal.Mdk2.ScriptTemplates` package version 2.2.31 available for `dotnet new`, plus a Python 3.10+ interpreter on `PATH` (or via `PYTHON`/`PYTHON_CMD`) so Bash tooling can execute JSON helpers and tests.
 - Optional Node.js + npm is required only when the developer opts into Codex CLI setup; the tooling must detect existing installations before offering automated install flows.
 - Configuration keys follow MDK2 conventions: for PB scripts, `ProjectName.mdk.ini`/`ProjectName.mdk.local.ini` capture build settings, where `binarypath` identifies the Space Engineers `Bin64` directory. Global overrides live in `se-config.ini`/`se-config.local.ini` using optional helper keys `steam_path` (Steam installation root) and `game_path` (Space Engineers install root) to derive `binarypath` when it remains `auto`.
 - Reads/writes only the root-level `se-config.ini` and `se-config.local.ini` templates plus the solution file denoted by CLI or auto-detection; per-project `.mdk` files are managed by the scaffolding tooling.
@@ -150,6 +150,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 
 - Missing or invalid `binarypath`: prompt for manual input when interactive; otherwise instruct the developer to supply `--binary-path` or update `se-config.local.ini`. Auto-detection failures should list attempted locations and suggest using helper options (`--steam-path`, `--game-path`).
 - Missing dependency with auto-install declined/failing (or `--notes-only` active): emit specific remediation commands per OS and exit 1 once checks complete.
+- Missing Python interpreter: output guidance to install Python 3.10+ (via package managers or official downloads) and exit 1 unless running `--notes-only`.
 - Path resolution failures: provide contextual messages (e.g., "Could not locate Steam under &lt;paths&gt;") for helper lookups and reiterate manual input requirements.
 - dotnet/winget/apt/npm command failures: surface exit codes/output, preserve existing files, and advise re-run after problem is addressed. Automated install attempts must report lack of privileges and recommend re-running with elevation or manual install.
 - Unexpected exceptions: log stack trace in debug mode and guide the developer to re-run with `--verbose debug` if not already enabled.
@@ -159,6 +160,7 @@ Use RFC 2119 terms. Keep each requirement atomic.
 - Print effective configuration sources and the merged result (template + local).
 - Verify `binarypath` exists and contains Space Engineers `Bin64` binaries.
 - Verify required runtimes: `pwsh` 7.x, `dotnet` 9.0.x; show versions detected.
+- Verify Python availability (`python3`, `python`, or `py -3`) for Bash tooling and tests; log the interpreter used.
 - Verify `dotnet new --list` includes `Mal.Mdk2.ScriptTemplates` at `2.2.31` (template available for scaffolding).
 - If Codex opted in: verify `node`/`npm` availability and `npx codex --version`.
 - Confirm `se-config.ini` and `se-config.local.ini` exist with expected sections.
@@ -222,3 +224,4 @@ Use RFC 2119 terms. Keep each requirement atomic.
 | 2025-09-30 | Added SoT pointer in Section 5 to `.ai/policies/core.yaml → modes`.                                                         | geho        |
 | 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                               | geho        |
 | 2025-10-02 | Documented Section 14 decision on package manager scope and noted JSON summary enhancement as future work.                  | geho        |
+| 2025-10-02 | Added Python 3.10+ requirement to Preconditions, shared responsibilities, validation, and failure modes.                    | geho        |

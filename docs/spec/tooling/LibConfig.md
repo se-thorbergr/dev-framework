@@ -85,6 +85,7 @@ The result MUST include **provenance**: which sources were used and their order.
 ## 6. Configuration Handling
 
 - **INI sections/keys:** The library ships with built-in schemas for canonical repo configs (lookup via `Get-ConfigSchema`/`config_schema_get`) and remains extensible—callers MAY supply overrides or custom schemas.
+- **Python dependency (Bash only):** The Bash implementation may shell out to Python 3.10+ for JSON parsing. Callers and tests MUST ensure an interpreter is available (discovered via `python3`, `python`, `py -3`, or the `PYTHON`/`PYTHON_CMD` environment variables).
 - **Schema catalogue:** Schemas include name, version, section/key definitions, and policy notes. Callers SHOULD reference catalogue entries by name instead of duplicating definitions.
 - **Discovery:** Default patterns include `se-config.ini`, `se-config.local.ini`, `*.mdk.ini`, `*.mdk.local.ini`; callers MAY extend patterns.
 - **Persistence policy:** The library **MUST NOT** write to any files. Callers persist diffs only to `.local` files; **never** modify protected bases (e.g., `*.mdk.ini`).
@@ -124,7 +125,7 @@ The result MUST include **provenance**: which sources were used and their order.
 - Diff tests covering `add`/`update`/`remove` actions and ensuring no spurious section output.
 - Integration tests verifying precedence (Base ← Local ← Env) and provenance reporting.
 - Negative tests for parse errors, schema violations, and unknown schema lookups.
-- Parity tests (Pester/bats) ensuring identical outcomes across shells.
+- Parity tests (Pester/bats) ensuring identical outcomes across shells. Bash suites MUST skip gracefully (with clear messaging) only when no Python interpreter is available; otherwise they MUST execute using the detected interpreter.
 
 ## 11. Acceptance Criteria
 
@@ -132,6 +133,7 @@ The result MUST include **provenance**: which sources were used and their order.
 - `Diff-Local` produces minimal change sets when desired≠effective; zero changes otherwise, and action types include `add`/`update`/`remove`.
 - `Render-Ini` yields ASCII-only minimal fragments; snapshots pass across shells.
 - `Get-ConfigSchema`/`config_schema_get` returns versioned catalogue entries consistently across shells (or empty when unknown).
+- Bash implementation confirms Python availability (or exits with actionable guidance) before performing JSON-heavy operations.
 - No file writes performed by the library; callers control persistence.
 
 ## 12. Security & Permissions
@@ -166,4 +168,5 @@ The result MUST include **provenance**: which sources were used and their order.
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                         | geho        |
 | 2025-09-28 | Normalized punctuation to ASCII (hyphens and ellipses) across the spec.                                                                       | geho        |
 | 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                 | geho        |
+| 2025-10-02 | Documented Python dependency for Bash implementation and test expectations (Sections 6, 10, 11).                                              | geho        |
 | 2025-10-02 | Documented per-key INI removal, noted YAML as out of scope, and added built-in schema catalogue guidance across Sections 4–11.                | geho        |
