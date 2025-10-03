@@ -47,20 +47,22 @@ Last updated: 2025-09-28 - Owner: geho
 | `Merge-Configs`       | `-Base object -Overlay object -Env map?`  | object `{ Data: hashtable }`                             | Deterministic merge (Base ← Overlay ← Env). Scalar override; arrays replaced unless `-Strategy` added later.                         |
 | `Validate-Config`     | `-Data hashtable -Schema object?`         | object `{ IsValid: bool; Errors:[...]; Warnings:[...] }` | Structural validation; schema optional/hookable.                                                                                     |
 | `Get-EffectiveConfig` | `-Root string -Env map?`                  | object `{ Data; Sources:[...]; Precedence:[...] }`       | Orchestrates discovery, read, merge, env overlay; returns normalized config + provenance.                                            |
-| `Diff-Local`          | `-Effective hashtable -Desired hashtable` | object `{ Changes:[{Section;Key;Old;New}] }`             | Computes **diff** between effective config and desired state; suitable for `.local` persistence.                                     |
+| `Diff-Local`          | `-Effective hashtable -Desired hashtable` | object `{ Changes:[{Action;Section;Key;Old;New}] }`      | Computes **diff** between effective config and desired state; supports `add`/`update`/`remove` (per-key) actions.                    |
+| `Get-ConfigSchema`    | `-Name string`                            | object `{ Name; Version; Sections:[...] }?`              | Looks up built-in schemas for well-known repo configs (e.g., `se-config.ini`). Returns `$null` when unknown.                         |
 | `Render-Ini`          | `-Changes object -Header string?`         | string                                                   | Renders minimal INI fragment for `.local` files (diff-only). ASCII-only.                                                             |
 
 ### 4.2 Bash (tools/lib/config.sh)
 
-| Function            | Parameters          | Returns                              | Notes                                             |
-| ------------------- | ------------------- | ------------------------------------ | ------------------------------------------------- |
-| `config_sources`    | `root,patterns...`  | array of paths                       | Discover candidate files.                         |
-| `config_read`       | `path`              | map `{format,data}`                  | Parse one file.                                   |
-| `config_merge`      | `base,overlay,env?` | map `{data}`                         | Deterministic merge order (base ← overlay ← env). |
-| `config_validate`   | `data,schema?`      | map `{is_valid,errors[],warnings[]}` | Structural validation.                            |
-| `config_effective`  | `root,env?`         | map `{data,sources[],precedence[]}`  | Discovery + read + merge + env overlay.           |
-| `config_diff_local` | `effective,desired` | map `{changes[]}`                    | Compute diff suitable for `.local`.               |
-| `ini_render`        | `changes,header?`   | string                               | Render minimal INI fragment (ASCII-only).         |
+| Function            | Parameters          | Returns                              | Notes                                                                        |
+| ------------------- | ------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| `config_sources`    | `root,patterns...`  | array of paths                       | Discover candidate files.                                                    |
+| `config_read`       | `path`              | map `{format,data}`                  | Parse one file.                                                              |
+| `config_merge`      | `base,overlay,env?` | map `{data}`                         | Deterministic merge order (base ← overlay ← env).                            |
+| `config_validate`   | `data,schema?`      | map `{is_valid,errors[],warnings[]}` | Structural validation.                                                       |
+| `config_effective`  | `root,env?`         | map `{data,sources[],precedence[]}`  | Discovery + read + merge + env overlay.                                      |
+| `config_diff_local` | `effective,desired` | map `{changes[]}`                    | Compute diff suitable for `.local`; actions include `add`/`update`/`remove`. |
+| `config_schema_get` | `name`              | map (empty when unknown)             | Lookup built-in schema catalogue by name.                                    |
+| `ini_render`        | `changes,header?`   | string                               | Render minimal INI fragment (ASCII-only).                                    |
 
 ### 4.3 Resolution & Precedence (normative)
 
@@ -77,12 +79,13 @@ The result MUST include **provenance**: which sources were used and their order.
 1. Discover sources via `Get-ConfigSources`/`config_sources` using known patterns.
 2. Parse each file with `Read-Config`/`config_read`.
 3. Merge into an **effective config** (Base ← Local ← Env) with `Merge-Configs`/`config_merge` or `Get-EffectiveConfig`/`config_effective`.
-4. Optionally validate via `Validate-Config`/`config_validate` (schema is caller-provided).
+4. Optionally validate via `Validate-Config`/`config_validate` (schema sourced from the built-in catalogue or supplied by the caller).
 5. To persist user-level changes, compute **diff** via `Diff-Local`/`config_diff_local` and render an INI fragment with `Render-Ini`/`ini_render` for the **caller** to write into the appropriate `.local` file.
 
 ## 6. Configuration Handling
 
-- **INI sections/keys:** The library is agnostic to domain schemas; callers provide schemas when needed.
+- **INI sections/keys:** The library ships with built-in schemas for canonical repo configs (lookup via `Get-ConfigSchema`/`config_schema_get`) and remains extensible—callers MAY supply overrides or custom schemas.
+- **Schema catalogue:** Schemas include name, version, section/key definitions, and policy notes. Callers SHOULD reference catalogue entries by name instead of duplicating definitions.
 - **Discovery:** Default patterns include `se-config.ini`, `se-config.local.ini`, `*.mdk.ini`, `*.mdk.local.ini`; callers MAY extend patterns.
 - **Persistence policy:** The library **MUST NOT** write to any files. Callers persist diffs only to `.local` files; **never** modify protected bases (e.g., `*.mdk.ini`).
 - **Environment overrides:** Callers pass an explicit env map. A recommended mapping is UPPERCASE env keys to `Section.Key` or `KEY` according to domain rules (documented by callers).
@@ -97,10 +100,12 @@ The result MUST include **provenance**: which sources were used and their order.
 - Effective config **MUST** include provenance (sources + precedence).
 - Reading protected files (e.g., `*.mdk.ini`) is allowed; **writing them is forbidden**.
 - PowerShell and Bash implementations **MUST** maintain behavior parity.
+- `Diff-Local` / `config_diff_local` **MUST** emit explicit `add`/`update`/`remove` actions per key and avoid producing empty sections.
+- `Get-ConfigSchema` / `config_schema_get` **MUST** return identical catalogue data across shells and include schema version metadata.
 
 ## 8. Outputs
 
-- **Data structures:** normalized config objects, validation results, change lists (diffs).
+- **Data structures:** normalized config objects, validation results, change lists (diffs with per-key actions).
 - **Rendered text:** minimal INI fragment for `.local` persistence (caller writes).
 - **Logs:** none directly; callers use LibCli for logging.
 
@@ -116,15 +121,17 @@ The result MUST include **provenance**: which sources were used and their order.
 ## 10. Validation
 
 - Unit tests for parsing (INI/JSON), merge determinism, and INI rendering minimality.
+- Diff tests covering `add`/`update`/`remove` actions and ensuring no spurious section output.
 - Integration tests verifying precedence (Base ← Local ← Env) and provenance reporting.
-- Negative tests for parse errors and schema violations.
+- Negative tests for parse errors, schema violations, and unknown schema lookups.
 - Parity tests (Pester/bats) ensuring identical outcomes across shells.
 
 ## 11. Acceptance Criteria
 
 - `Get-EffectiveConfig` returns normalized data and provenance for representative repos.
-- `Diff-Local` produces minimal change sets when desired≠effective; zero changes otherwise.
+- `Diff-Local` produces minimal change sets when desired≠effective; zero changes otherwise, and action types include `add`/`update`/`remove`.
 - `Render-Ini` yields ASCII-only minimal fragments; snapshots pass across shells.
+- `Get-ConfigSchema`/`config_schema_get` returns versioned catalogue entries consistently across shells (or empty when unknown).
 - No file writes performed by the library; callers control persistence.
 
 ## 12. Security & Permissions
@@ -138,9 +145,15 @@ The result MUST include **provenance**: which sources were used and their order.
 
 ## 14. Open Questions / Future Enhancements
 
-- Should we support partial section deletion semantics in INI diffs?
-- Add YAML parsing later (behind a feature flag)?
-- Provide a built-in schema for common repo files to reduce duplication?
+### Resolved decisions
+
+- INI diff plans now support per-key removal (partial section deletion) alongside adds/updates.
+- YAML parsing remains out of scope; LibConfig stays focused on INI sources.
+- A built-in schema catalogue for common repo files will ship with the library.
+
+### Future enhancements
+
+- Document schema-extension guidelines once the catalogue structure stabilizes.
 
 ## 15. Change Log
 
@@ -153,3 +166,4 @@ The result MUST include **provenance**: which sources were used and their order.
 | 2025-09-28 | Added Spec Authoring Policy reference to Section 1.1.                                                                                         | geho        |
 | 2025-09-28 | Normalized punctuation to ASCII (hyphens and ellipses) across the spec.                                                                       | geho        |
 | 2025-10-02 | Normalized "Last updated" line formatting and resolved markdownlint findings.                                                                 | geho        |
+| 2025-10-02 | Documented per-key INI removal, noted YAML as out of scope, and added built-in schema catalogue guidance across Sections 4–11.                | geho        |
