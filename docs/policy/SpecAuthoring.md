@@ -2,7 +2,7 @@
 
 # Spec Authoring Policy
 
-_Last updated: 2025-09-30 - Owner: geho_
+Last updated: 2025-09-30 - Owner: geho
 
 This policy defines mandatory structure and authorship rules for specifications under `docs/spec/**`.
 
@@ -84,7 +84,7 @@ This policy applies to all specs under `docs/spec/**`. Two profiles are recogniz
 
 ## 9. Change Log (Section 15)
 
-- On every edit, **update the top metadata banner** to today's date: `_Last updated: YYYY-MM-DD - Owner: <name>_`.
+- On every edit, **update the top metadata banner** to today's date: `Last updated: YYYY-MM-DD - Owner: <name>`.
 - Then append a row **at the bottom**: `| YYYY-MM-DD | change summary | approver |`.
 - Keep the policy notice line above the table unmodified.
 
@@ -122,3 +122,4 @@ This policy applies to all specs under `docs/spec/**`. Two profiles are recogniz
 | 2025-09-28 | Require updating the top "Last updated" line on edits, in addition to the change log row.                                 | geho        |
 | 2025-09-28 | Add **profiles** (tooling, se_ingame); allow Section 4 title "API Contract (SE ingame script)"; add profile expectations. | geho        |
 | 2025-09-30 | Wording: use "repository filenames"; remove chat/canvas phrasing in Section 4. Bumped top banner date.                    | geho        |
+| 2025-10-14 | Switched metadata banner guidance from italics to plain text.                                                             | geho        |
