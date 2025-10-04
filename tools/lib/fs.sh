@@ -3,6 +3,7 @@
 # LibFs shared library (Bash implementation)
 # Provides filesystem planning helpers; callers own any execution of plans.
 
+# shellcheck disable=SC2034  # exposed for downstream tooling that inspects sourced libs
 LIB_FS_VERSION="v1"
 
 declare -ga LIB_FS_PYTHON_CMD=()
@@ -13,22 +14,22 @@ lib_fs_init_python() {
     return 0
   fi
 
-  if [[ -n "$PYTHON" && -x $(command -v "$PYTHON" 2>/dev/null) ]]; then
+  if [[ -n "$PYTHON" && -x $(command -v "$PYTHON" 2> /dev/null) ]]; then
     LIB_FS_PYTHON_CMD=("$PYTHON")
     return 0
   fi
 
-  if command -v python3 >/dev/null 2>&1; then
+  if command -v python3 > /dev/null 2>&1; then
     LIB_FS_PYTHON_CMD=(python3)
     return 0
   fi
 
-  if command -v python >/dev/null 2>&1; then
+  if command -v python > /dev/null 2>&1; then
     LIB_FS_PYTHON_CMD=(python)
     return 0
   fi
 
-  if command -v py >/dev/null 2>&1; then
+  if command -v py > /dev/null 2>&1; then
     LIB_FS_PYTHON_CMD=(py -3)
     return 0
   fi
@@ -42,7 +43,7 @@ fs_normalize() {
     echo "python interpreter not available" >&2
     return 1
   fi
-  "${LIB_FS_PYTHON_CMD[@]}" - "$path" <<'PY'
+  "${LIB_FS_PYTHON_CMD[@]}" - "$path" << 'PY'
 import os, sys
 print(os.path.abspath(sys.argv[1]))
 PY
@@ -54,7 +55,7 @@ fs_plan_ensure_dir() {
     echo "python interpreter not available" >&2
     return 1
   fi
-  "${LIB_FS_PYTHON_CMD[@]}" - "$path" <<'PY'
+  "${LIB_FS_PYTHON_CMD[@]}" - "$path" << 'PY'
 import json, os, sys
 path = os.path.abspath(sys.argv[1])
 actions = []
@@ -72,7 +73,7 @@ fs_plan_ensure_file() {
     echo "python interpreter not available" >&2
     return 1
   fi
-  "${LIB_FS_PYTHON_CMD[@]}" - "$path" "$content" "$mode" <<'PY'
+  "${LIB_FS_PYTHON_CMD[@]}" - "$path" "$content" "$mode" << 'PY'
 import json, os, sys, hashlib
 path = os.path.abspath(sys.argv[1])
 content = sys.argv[2]
@@ -128,7 +129,7 @@ fs_plan_validate() {
   local plan_json=""
   local -a protected_patterns=()
   if [[ ${#LIB_FS_PROTECTED_PATTERNS[@]} -gt 0 ]]; then
-    protected_patterns=(${LIB_FS_PROTECTED_PATTERNS[@]})
+    protected_patterns=("${LIB_FS_PROTECTED_PATTERNS[@]}")
   fi
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -155,7 +156,7 @@ fs_plan_validate() {
     return 1
   fi
 
-  "${LIB_FS_PYTHON_CMD[@]}" - "$plan_json" "${protected_patterns[@]}" <<'PY'
+  "${LIB_FS_PYTHON_CMD[@]}" - "$plan_json" "${protected_patterns[@]}" << 'PY'
 import fnmatch, json, os, sys
 
 plan = json.loads(sys.argv[1])
@@ -223,7 +224,7 @@ fs_plan_render() {
     echo "python interpreter not available" >&2
     return 1
   fi
-  "${LIB_FS_PYTHON_CMD[@]}" - "$plan_json" "$header" <<'PY'
+  "${LIB_FS_PYTHON_CMD[@]}" - "$plan_json" "$header" << 'PY'
 import json, sys
 
 plan = json.loads(sys.argv[1])

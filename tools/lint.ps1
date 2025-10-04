@@ -77,6 +77,24 @@ function Resolve-LintTargets {
     return ,($ordered.ToArray())
 }
 
+function Resolve-PssaSettings {
+    param(
+        [Parameter(Mandatory)] [string]$SettingsPath,
+        [Parameter(Mandatory)] [version]$ModuleVersion
+    )
+
+    $minimum = [version]'1.25.0'
+    if ($ModuleVersion -lt $minimum) {
+        $settings = Import-PowerShellDataFile -Path $SettingsPath
+        if ($settings -is [System.Collections.IDictionary] -and $settings.ContainsKey('ExcludePaths')) {
+            $null = $settings.Remove('ExcludePaths')
+        }
+        return $settings
+    }
+
+    return $SettingsPath
+}
+
 function Get-ShellCheckFlags {
     param(
         [string]$Override
@@ -289,13 +307,35 @@ elseif ($hasWork) {
 
     if ($psFiles.Count -gt 0) {
         try {
-            Import-Module PSScriptAnalyzer -ErrorAction Stop | Out-Null
-            $results = Invoke-ScriptAnalyzer -Path $psFiles -Settings $pssaSettings -EnableExit:$false
-            if ($results.Count -gt 0) {
-                $errorCount = ($results | Where-Object { $_.Severity -eq 'Error' -or $_.Severity -eq 'ParseError' }).Count
-                $warningCount = ($results | Where-Object { $_.Severity -eq 'Warning' }).Count
+            $pssaModule = Import-Module PSScriptAnalyzer -ErrorAction Stop -PassThru
+            $effectiveSettings = Resolve-PssaSettings -SettingsPath $pssaSettings -ModuleVersion $pssaModule.Version
+            $isLegacyPssa = $pssaModule.Version -lt [version]'1.25.0'
+
+            $analysis = @()
+            if ($isLegacyPssa) {
+                foreach ($path in $psFiles) {
+                    $analysis += Invoke-ScriptAnalyzer -Path $path -Settings $effectiveSettings -EnableExit:$false
+                }
+            }
+            else {
+                $analysis = Invoke-ScriptAnalyzer -Path $psFiles -Settings $effectiveSettings -EnableExit:$false
+            }
+
+            $results = @()
+            if ($null -ne $analysis) {
+                if ($analysis -is [System.Array]) {
+                    $results = $analysis
+                } else {
+                    $results = @($analysis)
+                }
+            }
+
+            $resultsCount = $results.Length
+            if ($resultsCount -gt 0) {
+                $errorCount = (@($results | Where-Object { $_.Severity -eq 'Error' -or $_.Severity -eq 'ParseError' })).Length
+                $warningCount = (@($results | Where-Object { $_.Severity -eq 'Warning' })).Length
                 $shouldFail = ($errorCount -gt 0) -or ($failOnWarn -and $warningCount -gt 0)
-                $message = "PSSA: $($results.Count) finding(s)"
+                $message = "PSSA: $resultsCount finding(s)"
                 if ($shouldFail) {
                     Write-Log -Level 'info' -Message "ERROR: $message"
                     $exitCode = 1

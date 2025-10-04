@@ -80,7 +80,8 @@ function ConvertTo-LibFsPlan {
             if ($null -ne $raw) {
                 if ($raw -is [System.Collections.IEnumerable] -and -not ($raw -is [string])) {
                     $actions = @($raw)
-                } else {
+                }
+                else {
                     $actions = @($raw)
                 }
             }
@@ -91,7 +92,8 @@ function ConvertTo-LibFsPlan {
             if ($null -ne $rawConflicts) {
                 if ($rawConflicts -is [System.Collections.IEnumerable] -and -not ($rawConflicts -is [string])) {
                     $conflicts = @($rawConflicts)
-                } else {
+                }
+                else {
                     $conflicts = @($rawConflicts)
                 }
             }
@@ -162,7 +164,7 @@ function Plan-EnsureFile {
     }
 
     $diff = $null
-    if ($existingHash -ne $null -and $existingHash -ne $desiredHash) {
+    if ($null -ne $existingHash -and $existingHash -ne $desiredHash) {
         $diff = [pscustomobject]@{
             OldHash       = $existingHash
             NewHash       = $desiredHash
@@ -179,7 +181,8 @@ function Plan-EnsureFile {
                         Reason  = 'File exists; use overwrite or if-changed mode.'
                         Current = 'exists'
                     })
-            } else {
+            }
+            else {
                 $actions.Add([pscustomobject]@{
                         Op            = 'write'
                         Path          = $fullPath
@@ -219,7 +222,8 @@ function Plan-EnsureFile {
                     if ($diff) { $action | Add-Member -MemberType NoteProperty -Name Diff -Value $diff }
                     $actions.Add($action)
                 }
-            } else {
+            }
+            else {
                 $actions.Add([pscustomobject]@{
                         Op            = 'write'
                         Path          = $fullPath
@@ -251,11 +255,11 @@ function Plan-Copy {
     $targetPath = Normalize-Path -Path $Target
 
     return [pscustomobject]@{
-        Actions = @([pscustomobject]@{
-                Op           = 'copy'
-                Source       = $sourcePath
-                Destination  = $targetPath
-                Overwrite    = [bool]$Overwrite
+        Actions   = @([pscustomobject]@{
+                Op          = 'copy'
+                Source      = $sourcePath
+                Destination = $targetPath
+                Overwrite   = [bool]$Overwrite
             })
         Conflicts = @()
     }
@@ -273,11 +277,11 @@ function Plan-Move {
     $targetPath = Normalize-Path -Path $Target
 
     return [pscustomobject]@{
-        Actions = @([pscustomobject]@{
-                Op           = 'move'
-                Source       = $sourcePath
-                Destination  = $targetPath
-                Overwrite    = [bool]$Overwrite
+        Actions   = @([pscustomobject]@{
+                Op          = 'move'
+                Source      = $sourcePath
+                Destination = $targetPath
+                Overwrite   = [bool]$Overwrite
             })
         Conflicts = @()
     }

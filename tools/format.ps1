@@ -75,6 +75,24 @@ function Resolve-FormatTargets {
     return ,($ordered.ToArray())
 }
 
+function Resolve-PssaSettings {
+    param(
+        [Parameter(Mandatory)] [string]$SettingsPath,
+        [Parameter(Mandatory)] [version]$ModuleVersion
+    )
+
+    $minimum = [version]'1.25.0'
+    if ($ModuleVersion -lt $minimum) {
+        $settings = Import-PowerShellDataFile -Path $SettingsPath
+        if ($settings -is [System.Collections.IDictionary] -and $settings.ContainsKey('ExcludePaths')) {
+            $null = $settings.Remove('ExcludePaths')
+        }
+        return $settings
+    }
+
+    return $SettingsPath
+}
+
 $context = Initialize-Cli -Args $Args
 $flags = $context.Flags
 $unknown = $context.UnknownArgs
@@ -319,10 +337,11 @@ elseif ($hasWork) {
 
     if ($psFiles.Count -gt 0) {
         try {
-            Import-Module PSScriptAnalyzer -ErrorAction Stop | Out-Null
+            $pssaModule = Import-Module PSScriptAnalyzer -ErrorAction Stop -PassThru
+            $effectiveSettings = Resolve-PssaSettings -SettingsPath $pssaSettings -ModuleVersion $pssaModule.Version
             foreach ($path in $psFiles) {
                 $content = Get-Content -LiteralPath $path -Raw
-                $formatted = Invoke-Formatter -ScriptDefinition $content -Settings $pssaSettings
+                $formatted = Invoke-Formatter -ScriptDefinition $content -Settings $effectiveSettings
                 if ($formatted -ne $content) {
                     Set-Content -LiteralPath $path -Value $formatted -NoNewline
                 }
