@@ -14,7 +14,7 @@
     "ci:lint-check": "pwsh tools/lint.ps1 --dry-run --fail-on-warn"
   },
   "dependencies": {
-    "@openai/codex": "^0.39.0"
+    "@openai/codex": "^0.44.0"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^10.9.1",
